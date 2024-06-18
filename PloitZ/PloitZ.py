@@ -11,20 +11,25 @@ TOKEN = os.getenv("TOKEN")
 TEST_GUILD_ID = int(os.getenv("TEST_GUILD_ID", ""))  # Add your test guild ID here
 
 # File to store settings
-SETTINGS_FILE = "settings.json"
+SETTINGS_FILE = "./PloitZ/settings.json"
 
-# Load existing settings or initialize an empty dictionary
+# Initialize settings with an empty dictionary
 settings = {}
 
 
 def load_settings():
     global settings
-    if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, "r") as f:
-            settings = json.load(f)
-            print("Settings loaded successfully.")
-    else:
-        save_settings()  # Create an empty settings file if it doesn't exist
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, "r") as f:
+                settings = json.load(f)
+                print("Settings loaded successfully.")
+        else:
+            save_settings()  # Create an empty settings file if it doesn't exist
+    except json.JSONDecodeError:
+        settings = {}  # Initialize with empty dictionary if file is empty or invalid
+    except Exception as e:
+        print(f"Error loading settings: {e}")
 
 
 def save_settings():
@@ -172,12 +177,26 @@ async def on_raw_reaction_add(payload):
     if payload.message_id != message_id:
         return
 
-    guild = client.get_guild(payload.guild_id)
-    role = guild.get_role(role_id)
+    try:
+        guild = await client.fetch_guild(payload.guild_id)
+        if guild is None:
+            return
 
-    if role:
-        member = guild.get_member(payload.user_id)
+        member = await guild.fetch_member(payload.user_id)
+        if member is None:
+            return
+
+        role = guild.get_role(role_id)
+        if role is None:
+            return
+
         await member.add_roles(role)
+    except discord.Forbidden:
+        print("Bot doesn't have permissions to add roles.")
+    except discord.HTTPException:
+        print("Failed to add role due to Discord API issue.")
+    except Exception as e:
+        print(f"Error adding role: {e}")
 
 
 # Run the bot with the token
