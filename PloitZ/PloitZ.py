@@ -199,5 +199,138 @@ async def on_raw_reaction_add(payload):
         print(f"Error adding role: {e}")
 
 
+# ban command
+@client.tree.command(name="ban", description="Bans a user from the server.")
+@app_commands.checks.has_permissions(ban_members=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def ban_user(
+    interaction: discord.Interaction, user: discord.User, reason: str = None
+):
+    try:
+        await interaction.guild.ban(user, reason=reason)
+        await interaction.response.send_message(
+            f"{user.name} has been banned.", ephemeral=True
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to ban users.", ephemeral=True
+        )
+    except discord.HTTPException:
+        await interaction.response.send_message(
+            "Failed to ban the user. Please try again later.", ephemeral=True
+        )
+
+
+# kick command
+@client.tree.command(name="kick", description="Kicks a user from the server.")
+@app_commands.checks.has_permissions(kick_members=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def kick_user(
+    interaction: discord.Interaction, user: discord.User, reason: str = None
+):
+    try:
+        await interaction.guild.kick(user, reason=reason)
+        await interaction.response.send_message(
+            f"{user.name} has been kicked.", ephemeral=True
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to kick users.", ephemeral=True
+        )
+    except discord.HTTPException:
+        await interaction.response.send_message(
+            "Failed to kick the user. Please try again later.", ephemeral=True
+        )
+
+
+# mute command
+
+
+@client.tree.command(name="mute", description="Mutes a user for a specified duration.")
+@app_commands.checks.has_permissions(manage_roles=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def mute_user(
+    interaction: discord.Interaction,
+    user: discord.Member,
+    duration: str,
+    reason: str = None,
+):
+    # Implement mute logic here
+    await interaction.response.send_message(
+        "Mute command is not implemented yet.", ephemeral=True
+    )
+
+
+# unmute
+
+
+@client.tree.command(name="unmute", description="Unmutes a user.")
+@app_commands.checks.has_permissions(manage_roles=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def unmute_user(interaction: discord.Interaction, user: discord.Member):
+    # Implement unmute logic here
+    await interaction.response.send_message(
+        "Unmute command is not implemented yet.", ephemeral=True
+    )
+
+
+# warn
+
+
+@client.tree.command(name="warn", description="Issues a warning to a user.")
+@app_commands.checks.has_permissions(manage_messages=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def warn_user(
+    interaction: discord.Interaction, user: discord.Member, reason: str
+):
+    # Implement warn logic here
+    await interaction.response.send_message(
+        "Warn command is not implemented yet.", ephemeral=True
+    )
+
+
+# clear
+
+
+@client.tree.command(
+    name="clear", description="Deletes a specified number of messages from a channel."
+)
+@app_commands.checks.has_permissions(manage_messages=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def clear_messages(interaction: discord.Interaction, number: int):
+    # Implement clear messages logic here
+    await interaction.response.send_message(
+        "Clear command is not implemented yet.", ephemeral=True
+    )
+
+
+# lock channel
+@client.tree.command(
+    name="lock", description="Locks a channel, preventing users from sending messages."
+)
+@app_commands.checks.has_permissions(manage_channels=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def lock_channel(interaction: discord.Interaction, channel: discord.TextChannel):
+    # Implement lock channel logic here
+    await interaction.response.send_message(
+        "Lock command is not implemented yet.", ephemeral=True
+    )
+
+
+# unlock channel
+
+
+@client.tree.command(name="unlock", description="Unlocks a channel.")
+@app_commands.checks.has_permissions(manage_channels=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def unlock_channel(
+    interaction: discord.Interaction, channel: discord.TextChannel
+):
+    # Implement unlock channel logic here
+    await interaction.response.send_message(
+        "Unlock command is not implemented yet.", ephemeral=True
+    )
+
+
 # Run the bot with the token
 client.run(TOKEN)
