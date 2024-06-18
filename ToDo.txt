@@ -1,0 +1,56 @@
+make levelling system connecteed to supabase
+
+Essential Commands
+Moderation Commands
+!ban [user] [reason]: Bans a user from the server.
+!kick [user] [reason]: Kicks a user from the server.
+!mute [user] [duration] [reason]: Mutes a user for a specified duration.
+!unmute [user]: Unmutes a user.
+!warn [user] [reason]: Issues a warning to a user.
+!clear [number]: Deletes a specified number of messages from a channel.
+!lock [channel]: Locks a channel, preventing users from sending messages.
+!unlock [channel]: Unlocks a channel.
+Utility Commands
+!ping: Checks the bot's latency.
+!info: Provides information about the server or bot.
+!user [@user]: Displays information about a specific user.
+!serverinfo: Displays information about the server.
+!roleinfo [@role]: Provides information about a specific role.
+!poll [question] [option1] [option2] ...: Creates a poll for users to vote on.
+Fun and Engagement Commands
+!meme: Fetches a random meme.
+!joke: Tells a random joke.
+!quote: Sends a random inspirational quote.
+!8ball [question]: Magic 8-ball command for fun predictions.
+!roll [number]: Rolls a random number between 1 and the specified number.
+Optional Commands
+Customization and Roles
+!autorole [@role]: Automatically assigns a role to new members.
+!selfrole [@role]: Allows users to assign a role to themselves.
+!removerole [@role]: Allows users to remove a self-assigned role.
+Music Commands
+!play [song name or URL]: Plays a song in a voice channel.
+!skip: Skips the currently playing song.
+!queue: Displays the current music queue.
+!stop: Stops the music and clears the queue.
+Leveling and Economy
+!rank: Displays the user’s rank and experience points.
+!leaderboard: Shows the top-ranked users in the server.
+!daily: Allows users to claim a daily reward.
+!balance: Shows the user's balance in the server’s currency.
+!shop: Displays items available for purchase with the server’s currency.
+!buy [item]: Allows users to purchase items from the shop.
+Event and Reminder Commands
+!event [details]: Creates a server event with specific details.
+!remindme [time] [message]: Sets a personal reminder for the user.
+!reminder [time] [message]: Sets a server-wide reminder for an event or announcement.
+Administration Commands
+!setprefix [new prefix]: Changes the bot’s command prefix.
+!disablecommand [command]: Disables a specific command in the server.
+!enablecommand [command]: Enables a previously disabled command.
+!logchannel [#channel]: Sets a specific channel for logging moderation actions and events.
+Best Practices
+Permissions: Ensure commands have appropriate permission checks to prevent misuse.
+Help Command: Implement a !help command to list all available commands and their usage.
+Feedback: Provide feedback messages to users for successful and unsuccessful command executions.
+By implementing these commands, a Discord bot can significantly improve the functionality and engagement within a community server.
