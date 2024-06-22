@@ -2,8 +2,8 @@ make levelling system connecteed to supabase
 
 Essential Commands
 Moderation Commands
-ban [user] [reason]: Bans a user from the server.
-kick [user] [reason]: Kicks a user from the server.
+ban [user] [reason]: Bans a user from the server. - done
+kick [user] [reason]: Kicks a user from the server. - done
 mute [user] [duration] [reason]: Mutes a user for a specified duration.
 unmute [user]: Unmutes a user.
 warn [user] [reason]: Issues a warning to a user.
@@ -11,9 +11,9 @@ clear [number]: Deletes a specified number of messages from a channel.
 lock [channel]: Locks a channel, preventing users from sending messages.
 unlock [channel]: Unlocks a channel.
 Utility Commands
-ping: Checks the bot's latency.
+ping: Checks the bot's latency. -done
 info: Provides information about the server or bot.
-user [@user]: Displays information about a specific user.
+user [@user]: Displays information about a specific user. 
 serverinfo: Displays information about the server.
 roleinfo [@role]: Provides information about a specific role.
 poll [question] [option1] [option2] ...: Creates a poll for users to vote on.
