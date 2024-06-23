@@ -13,39 +13,39 @@ TEST_GUILD_ID = int(os.getenv("TEST_GUILD_ID", ""))  # Add your test guild ID he
 TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY", ""))
 
 
-# File to store settings
-SETTINGS_FILE = "./PloitZ/settings.json"
+# # File to store settings
+# SETTINGS_FILE = "./PloitZ/settings.json"
 
-# Initialize settings with an empty dictionary
-settings = {}
-
-
-def load_settings():
-    global settings
-    try:
-        if os.path.exists(SETTINGS_FILE):
-            with open(SETTINGS_FILE, "r") as f:
-                settings = json.load(f)
-                print("Settings loaded successfully.")
-        else:
-            save_settings()  # Create an empty settings file if it doesn't exist
-    except json.JSONDecodeError:
-        settings = {}  # Initialize with empty dictionary if file is empty or invalid
-    except Exception as e:
-        print(f"Error loading settings: {e}")
+# # Initialize settings with an empty dictionary
+# settings = {}
 
 
-def save_settings():
-    try:
-        with open(SETTINGS_FILE, "w") as f:
-            json.dump(settings, f, indent=4)
-        print("Settings saved successfully.")
-    except Exception as e:
-        print(f"Error saving settings: {e}")
+# def load_settings():
+#     global settings
+#     try:
+#         if os.path.exists(SETTINGS_FILE):
+#             with open(SETTINGS_FILE, "r") as f:
+#                 settings = json.load(f)
+#                 print("Settings loaded successfully.")
+#         else:
+#             save_settings()  # Create an empty settings file if it doesn't exist
+#     except json.JSONDecodeError:
+#         settings = {}  # Initialize with empty dictionary if file is empty or invalid
+#     except Exception as e:
+#         print(f"Error loading settings: {e}")
 
 
-# Load settings on startup
-load_settings()
+# def save_settings():
+#     try:
+#         with open(SETTINGS_FILE, "w") as f:
+#             json.dump(settings, f, indent=4)
+#         print("Settings saved successfully.")
+#     except Exception as e:
+#         print(f"Error saving settings: {e}")
+
+
+# # Load settings on startup
+# load_settings()
 
 # Initialize bot
 intents = discord.Intents.default()
@@ -109,7 +109,7 @@ async def on_ready():
         await bot.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.watching,
-                name=f"{servers} servers and {members} members",
+                name=f"{members} members",
             )
         )
 
@@ -499,6 +499,51 @@ async def close(interaction: discord.Interaction):
         await interaction.response.send_message(
             "Failed to delete the channel. Please try again later."
         )
+
+
+# Path to commands.json
+COMMANDS_FILE = os.path.join(os.path.dirname(__file__), "commands.json")
+
+
+# Read commands from commands.json
+def read_commands():
+    try:
+        with open(COMMANDS_FILE, "r") as f:
+            commands_data = json.load(f)
+        return commands_data
+    except FileNotFoundError:
+        print(f"FileNotFoundError: '{COMMANDS_FILE}' not found.")
+        return {}
+    except json.JSONDecodeError:
+        print(
+            f"JSONDecodeError: Unable to parse '{COMMANDS_FILE}'. Check if the file contains valid JSON data."
+        )
+        return {}
+
+
+@bot.tree.command(name="help", description="Show all available commands.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def help_command(interaction: discord.Interaction):
+    commands_data = read_commands()
+
+    embed = discord.Embed(
+        title="PloitZ Bot Commands",
+        description="Here are the available commands categorized:",
+        color=discord.Color.blue(),
+    )
+
+    for category, commands_list in commands_data.items():
+        if commands_list:  # Check if there are commands in this category
+            command_list_str = "\n".join(
+                f"`/{command['name']}` - {command['description']}"
+                for command in commands_list
+            )
+            embed.add_field(name=category, value=command_list_str, inline=False)
+
+    try:
+        await interaction.response.send_message(embed=embed)
+    except discord.HTTPException as e:
+        print(f"Failed to send help embed: {e}")
 
 
 # Run the bot with the token

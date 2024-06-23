@@ -1,0 +1,174 @@
+{
+    "Moderation": [
+        {
+            "name": "ban",
+            "description": "Bans a user from the server."
+        },
+        {
+            "name": "kick",
+            "description": "Kicks a user from the server."
+        },
+        {
+            "name": "mute",
+            "description": "Mutes a user for a specified duration."
+        },
+        {
+            "name": "unmute",
+            "description": "Unmutes a user."
+        },
+        {
+            "name": "warn",
+            "description": "Issues a warning to a user."
+        },
+        {
+            "name": "clear",
+            "description": "Deletes a specified number of messages from a channel."
+        },
+        {
+            "name": "lock",
+            "description": "Locks a channel, preventing users from sending messages."
+        },
+        {
+            "name": "unlock",
+            "description": "Unlocks a channel."
+        }
+    ],
+    "Utility": [
+        {
+            "name": "ping",
+            "description": "Checks the bot's latency."
+        },
+        {
+            "name": "info",
+            "description": "Provides information about the server or bot."
+        },
+        {
+            "name": "user",
+            "description": "Displays information about a specific user."
+        },
+        {
+            "name": "serverinfo",
+            "description": "Displays information about the server."
+        },
+        {
+            "name": "roleinfo",
+            "description": "Provides information about a specific role."
+        },
+        {
+            "name": "poll",
+            "description": "Creates a poll for users to vote on."
+        }
+    ],
+    "Fun and Engagement": [
+        {
+            "name": "meme",
+            "description": "Fetches a random meme."
+        },
+        {
+            "name": "joke",
+            "description": "Tells a random joke."
+        },
+        {
+            "name": "quote",
+            "description": "Sends a random inspirational quote."
+        },
+        {
+            "name": "8ball",
+            "description": "Magic 8-ball command for fun predictions."
+        },
+        {
+            "name": "roll",
+            "description": "Rolls a random number between 1 and the specified number."
+        }
+    ],
+    "Customization and Roles": [
+        {
+            "name": "autorole",
+            "description": "Automatically assigns a role to new members."
+        },
+        {
+            "name": "selfrole",
+            "description": "Allows users to assign a role to themselves."
+        },
+        {
+            "name": "removerole",
+            "description": "Allows users to remove a self-assigned role."
+        }
+    ],
+    "Music": [
+        {
+            "name": "play",
+            "description": "Plays a song in a voice channel."
+        },
+        {
+            "name": "skip",
+            "description": "Skips the currently playing song."
+        },
+        {
+            "name": "queue",
+            "description": "Displays the current music queue."
+        },
+        {
+            "name": "stop",
+            "description": "Stops the music and clears the queue."
+        }
+    ],
+    "Leveling and Economy": [
+        {
+            "name": "rank",
+            "description": "Displays the user’s rank and experience points."
+        },
+        {
+            "name": "leaderboard",
+            "description": "Shows the top-ranked users in the server."
+        },
+        {
+            "name": "daily",
+            "description": "Allows users to claim a daily reward."
+        },
+        {
+            "name": "balance",
+            "description": "Shows the user's balance in the server’s currency."
+        },
+        {
+            "name": "shop",
+            "description": "Displays items available for purchase with the server’s currency."
+        },
+        {
+            "name": "buy",
+            "description": "Allows users to purchase items from the shop."
+        }
+    ],
+    "Event and Reminder Commands": [
+        {
+            "name": "event",
+            "description": "Creates a server event with specific details."
+        },
+        {
+            "name": "remindme",
+            "description": "Sets a personal reminder for the user."
+        },
+        {
+            "name": "reminder",
+            "description": "Sets a server-wide reminder for an event or announcement."
+        }
+    ],
+    "Administration Commands": [
+        {
+            "name": "setprefix",
+            "description": "Changes the bot’s command prefix."
+        },
+        {
+            "name": "disablecommand",
+            "description": "Disables a specific command in the server."
+        },
+        {
+            "name": "enablecommand",
+            "description": "Enables a previously disabled command."
+        },
+        {
+            "name": "logchannel",
+            "description": "Sets a specific channel for logging moderation actions and events."
+        }
+    ]
+}
