@@ -50,6 +50,7 @@ TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY", ""))
 # # Load settings on startup
 # load_settings()
 
+
 # Initialize bot
 intents = discord.Intents.default()
 intents.reactions = True  # Enable reaction intents
@@ -968,6 +969,79 @@ async def roll(interaction: discord.Interaction, max_number: int):
 
     rolled_number = random.randint(1, max_number)
     await interaction.response.send_message(f"🎲 You rolled: {rolled_number}")
+
+
+DATA_FILE = "users.json"
+
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as file:
+            return json.load(file)
+    else:
+        return {}
+
+
+# Save user data to file
+def save_data(data):
+    with open(DATA_FILE, "w") as file:
+        json.dump(data, file, indent=4)
+
+
+# Ensure data file exists
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "w") as file:
+        json.dump({}, file)
+
+
+@bot.event
+async def on_message(message):
+    if message.author.bot == False:
+        with open("users.json", "r") as f:
+            users = json.load(f)
+        await add_experience(users, message.author)
+        await level_up(users, message.author, message)
+        with open("users.json", "w") as f:
+            json.dump(users, f)
+            await bot.process_commands(message)
+
+
+async def add_experience(users, user):
+    if not f"{user.id}" in users:
+        users[f"{user.id}"] = {}
+        users[f"{user.id}"]["experience"] = 0
+        users[f"{user.id}"]["level"] = 0
+    users[f"{user.id}"]["experience"] += 6
+    print(f"{users[f'{user.id}']['level']}")
+
+
+async def level_up(users, user, message):
+    experience = users[f"{user.id}"]["experience"]
+    lvl_start = users[f"{user.id}"]["level"]
+    lvl_end = int(experience ** (1 / 4))
+    if lvl_start < lvl_end:
+        await message.channel.send(
+            f":tada: {user.mention} has reached level {lvl_end}. Congrats! :tada:"
+        )
+        users[f"{user.id}"]["level"] = lvl_end
+
+
+# Command: /level
+@bot.tree.command(name="level", description="Check your current level.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def cmd_level(interaction: discord.Interaction):
+    user_id = str(interaction.user.id)
+    user_data = load_data()
+
+    if user_id in user_data:
+        level = user_data[user_id]["level"]
+        await interaction.response.send_message(
+            f"{interaction.user.name}, your current level is {level}"
+        )
+    else:
+        await interaction.response.send_message(
+            f"{interaction.user.name}, you haven't leveled up yet!"
+        )
 
 
 # Run the bot with the token

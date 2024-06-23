@@ -77,62 +77,36 @@
             "description": "Rolls a random number between 1 and the specified number."
         }
     ],
-    "Customization and Roles": [
-        {
-            "name": "autorole",
-            "description": "Automatically assigns a role to new members."
-        },
-        {
-            "name": "selfrole",
-            "description": "Allows users to assign a role to themselves."
-        },
-        {
-            "name": "removerole",
-            "description": "Allows users to remove a self-assigned role."
-        }
-    ],
     "Music": [
         {
             "name": "play",
-            "description": "Plays a song in a voice channel."
+            "description": "Plays a song in a voice channel. (coming soon)"
         },
         {
             "name": "skip",
-            "description": "Skips the currently playing song."
+            "description": "Skips the currently playing song. (coming soon)"
         },
         {
             "name": "queue",
-            "description": "Displays the current music queue."
+            "description": "Displays the current music queue. (coming soon)"
         },
         {
             "name": "stop",
-            "description": "Stops the music and clears the queue."
+            "description": "Stops the music and clears the queue. (coming soon)"
         }
     ],
-    "Leveling and Economy": [
+    "Leveling": [
         {
-            "name": "rank",
-            "description": "Displays the user’s rank and experience points."
-        },
-        {
-            "name": "leaderboard",
-            "description": "Shows the top-ranked users in the server."
-        },
-        {
-            "name": "daily",
-            "description": "Allows users to claim a daily reward."
-        },
-        {
-            "name": "balance",
-            "description": "Shows the user's balance in the server’s currency."
+            "name": "level",
+            "description": "Displays the user’s level in the server."
         },
         {
             "name": "shop",
-            "description": "Displays items available for purchase with the server’s currency."
+            "description": "Displays items available for purchase with the server’s currency. (coming soon)"
         },
         {
             "name": "buy",
-            "description": "Allows users to purchase items from the shop."
+            "description": "Allows users to purchase items from the shop. (coming soon)"
         }
     ],
     "Event and Reminder Commands": [
