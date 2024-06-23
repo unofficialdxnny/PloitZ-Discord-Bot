@@ -9,17 +9,16 @@ PloitZ is a versatile and powerful Discord bot designed to enhance the experienc
 #### Moderation Commands
 - **/ban [user] [reason]**: Bans a user from the server.
 - **/kick [user] [reason]**: Kicks a user from the server.
-- **/mute [user] [duration] [reason]**: Mutes a user for a specified duration. (coming soon)
-- **/unmute [user]**: Unmutes a user. (coming soon)
-- **/warn [user] [reason]**: Issues a warning to a user. (coming soon)
-- **/clear [number]**: Deletes a specified number of messages from a channel. (coming soon)
-- **/lock [channel]**: Locks a channel, preventing users from sending messages. (coming soon)
-- **/unlock [channel]**: Unlocks a channel. (coming soon)
+- **/mute [user] [duration] [reason]**: Mutes a user for a specified duration. 
+- **/unmute [user]**: Unmutes a user. 
+- **/warn [user] [reason]**: Issues a warning to a user. 
+- **/clear [number]**: Deletes a specified number of messages from a channel. 
+- **/lock [channel]**: Locks a channel, preventing users from sending messages. 
+- **/unlock [channel]**: Unlocks a channel. 
 
 #### Utility Commands
 - **/ping**: Checks the bot's latency.
-- **/info**: Provides information about the server or bot. (coming soon)
-- **/user [@user]**: Displays information about a specific user. (coming soon)
+- **/user [@user]**: Displays information about a specific user. 
 - **/serverinfo**: Displays information about the server.
 - **/roleinfo [@role]**: Provides information about a specific role. (coming soon)
 - **/poll [question] [option1] [option2] ...**: Creates a poll for users to vote on. (coming soon)
