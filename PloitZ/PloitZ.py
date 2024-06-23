@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import asyncio
 import aiohttp
-
+import random
 
 # Load environment variables from .env file
 load_dotenv()
@@ -68,6 +68,7 @@ MEMBERS_ROLE_ID = int(os.getenv("MEMBERS_ROLE_ID"))
 REACTION_EMOJI = "✅"
 UNVERIFIED_ROLE_ID = int(os.getenv("UNVERIFIED_ROLE_ID"))
 MUTED_ROLE_ID = int(os.getenv("MUTED_ROLE_ID", ""))
+GENERAL_CHANNEL_ID = int(os.getenv("GENERAL_CHANNEL_ID", ""))
 
 
 @bot.event
@@ -827,6 +828,146 @@ async def poll(
         await poll_message.add_reaction(reactions[i])
 
     await interaction.response.send_message("Poll created successfully!")
+
+
+async def fetch_meme(query=None):
+    url = "https://meme-api.com/gimme"
+    if query:
+        url += f"/{query}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                return data.get("url")
+            else:
+                return None
+
+
+@bot.tree.command(
+    name="meme", description="Send a random meme or a meme about a specific topic."
+)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.describe(topic="Optional topic for the meme")
+async def meme(interaction: discord.Interaction, topic: str = None):
+    meme_url = await fetch_meme(topic)
+    if meme_url:
+        await interaction.response.send_message(meme_url)
+    else:
+        await interaction.response.send_message(
+            "Could not fetch a meme at the moment. Please try again later."
+        )
+
+
+async def fetch_joke(joke_type=None):
+    base_url = "https://v2.jokeapi.dev/joke/"
+    categories = {"funny": "Any", "sarcastic": "Any?type=single", "dad": "Dad"}
+    url = base_url + categories.get(joke_type, "Any")
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                if data.get("type") == "single":
+                    return data.get("joke")
+                elif data.get("type") == "twopart":
+                    return f"{data.get('setup')} - {data.get('delivery')}"
+            else:
+                return None
+
+
+@bot.tree.command(name="joke", description="Tell a random joke.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.describe(joke_type="Type of joke (funny, sarcastic, dad)")
+async def joke(interaction: discord.Interaction, joke_type: str = None):
+    joke_text = await fetch_joke(joke_type)
+    if joke_text:
+        await interaction.response.send_message(joke_text)
+    else:
+        await interaction.response.send_message(
+            "Could not fetch a joke at the moment. Please try again later.",
+            ephemeral=True,
+        )
+
+
+async def fetch_quote():
+    url = "https://api.quotable.io/random"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                return f"\"{data['content']}\" - {data['author']}"
+            else:
+                return None
+
+
+@tasks.loop(minutes=5)
+async def send_quote():
+    channel = bot.get_channel(GENERAL_CHANNEL_ID)
+    if channel:
+        quote = await fetch_quote()
+        if quote:
+            await channel.send(quote)
+
+
+@bot.tree.command(name="quote", description="Send a random inspirational quote.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def quote(interaction: discord.Interaction):
+    quote_text = await fetch_quote()
+    if quote_text:
+        await interaction.response.send_message(quote_text)
+    else:
+        await interaction.response.send_message(
+            "Could not fetch a quote at the moment. Please try again later.",
+            ephemeral=True,
+        )
+
+
+@bot.tree.command(name="8ball", description="Ask the magic 8-ball a question.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.describe(question="The question you want to ask the magic 8-ball")
+async def eight_ball(interaction: discord.Interaction, question: str):
+    responses = [
+        "It is certain.",
+        "It is decidedly so.",
+        "Without a doubt.",
+        "Yes - definitely.",
+        "You may rely on it.",
+        "As I see it, yes.",
+        "Most likely.",
+        "Outlook good.",
+        "Yes.",
+        "Signs point to yes.",
+        "Reply hazy, try again.",
+        "Ask again later.",
+        "Better not tell you now.",
+        "Cannot predict now.",
+        "Concentrate and ask again.",
+        "Don't count on it.",
+        "My reply is no.",
+        "My sources say no.",
+        "Outlook not so good.",
+        "Very doubtful.",
+    ]
+    response = random.choice(responses)
+    await interaction.response.send_message(
+        f"🎱 **Question:** {question}\n**Answer:** {response}"
+    )
+
+
+@bot.tree.command(
+    name="roll", description="Rolls a random number between 1 and the specified number."
+)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.describe(max_number="The maximum number to roll (inclusive)")
+async def roll(interaction: discord.Interaction, max_number: int):
+    if max_number < 1:
+        await interaction.response.send_message(
+            "Please specify a number greater than or equal to 1.", ephemeral=True
+        )
+        return
+
+    rolled_number = random.randint(1, max_number)
+    await interaction.response.send_message(f"🎲 You rolled: {rolled_number}")
 
 
 # Run the bot with the token
