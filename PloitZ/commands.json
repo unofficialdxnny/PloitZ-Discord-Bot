@@ -39,10 +39,6 @@
             "description": "Checks the bot's latency."
         },
         {
-            "name": "info",
-            "description": "Provides information about the server or bot."
-        },
-        {
             "name": "user",
             "description": "Displays information about a specific user."
         },

@@ -6,6 +6,7 @@ from discord import app_commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import asyncio
+import aiohttp
 
 
 # Load environment variables from .env file
@@ -740,6 +741,92 @@ async def unlock(interaction: discord.Interaction, channel: discord.TextChannel)
         await interaction.response.send_message(
             f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
         )
+
+
+@bot.tree.command(name="roleinfo", description="Get information about a role.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.describe(role="Select a role to get information about")
+async def roleinfo(interaction: discord.Interaction, role: str):
+    guild = interaction.guild
+    selected_role = discord.utils.get(guild.roles, name=role)
+
+    if selected_role is None:
+        await interaction.response.send_message(
+            f"Role '{role}' not found.", ephemeral=True
+        )
+        return
+
+    embed = discord.Embed(
+        title=f"Role Info: {selected_role.name}", color=selected_role.color
+    )
+    embed.add_field(name="Role ID", value=selected_role.id)
+    embed.add_field(name="Color", value=str(selected_role.color))
+    embed.add_field(
+        name="Created At", value=selected_role.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    )
+    embed.add_field(name="Position", value=selected_role.position)
+    embed.add_field(name="Mentionable", value=str(selected_role.mentionable))
+    embed.add_field(name="Managed", value=str(selected_role.managed))
+    embed.add_field(
+        name="Permissions",
+        value=", ".join(perm[0] for perm in selected_role.permissions if perm[1]),
+    )
+
+    await interaction.response.send_message(embed=embed)
+
+
+@roleinfo.autocomplete("role")
+async def role_autocomplete(interaction: discord.Interaction, current: str):
+    roles = interaction.guild.roles
+    return [
+        app_commands.Choice(name=role.name, value=role.name)
+        for role in roles
+        if current.lower() in role.name.lower()
+    ]
+
+
+@bot.tree.command(name="poll", description="Create a poll")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.describe(
+    question="The poll question",
+    option1="First option",
+    option2="Second option",
+    option3="Third option (optional)",
+    option4="Fourth option (optional)",
+)
+async def poll(
+    interaction: discord.Interaction,
+    question: str,
+    option1: str,
+    option2: str,
+    option3: str = None,
+    option4: str = None,
+):
+    # Check if the user is an admin
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "You do not have permission to use this command."
+        )
+        return
+
+    # Create the poll embed
+    embed = discord.Embed(
+        title="Poll", description=question, color=discord.Color.blue()
+    )
+    options = [option1, option2, option3, option4]
+    options = [opt for opt in options if opt]  # Filter out None values
+
+    for i, option in enumerate(options, 1):
+        embed.add_field(name=f"Option {i}", value=option, inline=False)
+
+    # Send the poll and add reactions
+    poll_message = await interaction.channel.send(embed=embed)
+    reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
+
+    for i in range(len(options)):
+        await poll_message.add_reaction(reactions[i])
+
+    await interaction.response.send_message("Poll created successfully!")
 
 
 # Run the bot with the token
