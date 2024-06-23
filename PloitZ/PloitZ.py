@@ -1,10 +1,12 @@
 import os
 import json
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
+import asyncio
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -54,6 +56,7 @@ intents.guilds = True  # Enable guild intents
 intents.messages = True  # Enable message intents
 intents.members = True  # Enable member intents
 intents.presences = True  # Enable presence intents
+intents.guild_messages = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
@@ -63,6 +66,7 @@ VERIFICATION_CHANNEL_ID = int(os.getenv("VERIFICATION_CHANNEL_ID"))
 MEMBERS_ROLE_ID = int(os.getenv("MEMBERS_ROLE_ID"))
 REACTION_EMOJI = "✅"
 UNVERIFIED_ROLE_ID = int(os.getenv("UNVERIFIED_ROLE_ID"))
+MUTED_ROLE_ID = int(os.getenv("MUTED_ROLE_ID", ""))
 
 
 @bot.event
@@ -544,6 +548,198 @@ async def help_command(interaction: discord.Interaction):
         await interaction.response.send_message(embed=embed)
     except discord.HTTPException as e:
         print(f"Failed to send help embed: {e}")
+
+
+# mute users
+muted_users = {}
+
+
+@bot.tree.command(name="mute", description="Mute a user indefinitely.")
+@app_commands.checks.has_permissions(manage_roles=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def mute(interaction: discord.Interaction, user: discord.Member):
+    guild = interaction.guild
+    muted_role = guild.get_role(MUTED_ROLE_ID)
+    if not muted_role:
+        await interaction.response.send_message(
+            "Muted role not found. Please set up a role with the appropriate permissions."
+        )
+        return
+
+    # Mute the user
+    try:
+        await user.add_roles(muted_role)
+        await interaction.response.send_message(f"Muted {user.mention} indefinitely.")
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to mute this user."
+        )
+    except discord.HTTPException:
+        await interaction.response.send_message(
+            "Failed to mute the user. Please try again later."
+        )
+
+
+@bot.tree.command(name="unmute", description="Unmute a user.")
+@app_commands.checks.has_permissions(manage_roles=True)
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def unmute(interaction: discord.Interaction, user: discord.Member):
+    guild = interaction.guild
+    muted_role = guild.get_role(MUTED_ROLE_ID)
+    if not muted_role:
+        await interaction.response.send_message(
+            "Muted role not found. Please set up a role with the appropriate permissions."
+        )
+        return
+
+    # Unmute the user
+    try:
+        await user.remove_roles(muted_role)
+        await interaction.response.send_message(f"Unmuted {user.mention}.")
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to unmute this user."
+        )
+    except discord.HTTPException:
+        await interaction.response.send_message(
+            "Failed to unmute the user. Please try again later."
+        )
+
+
+@bot.tree.command(name="muted", description="List all currently muted users.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def muted(interaction: discord.Interaction):
+    guild = interaction.guild
+    muted_role = guild.get_role(MUTED_ROLE_ID)
+    if not muted_role:
+        await interaction.response.send_message(
+            "Muted role not found. Please set up a role with the appropriate permissions."
+        )
+        return
+
+    # Find all members with the muted role
+    muted_members = [member for member in guild.members if muted_role in member.roles]
+
+    if not muted_members:
+        await interaction.response.send_message("No users are currently muted.")
+        return
+
+    # Prepare embed message with muted users list
+    embed = discord.Embed(
+        title="Currently Muted Users",
+        description="List of users currently muted in the server.",
+        color=discord.Color.blue(),
+    )
+
+    muted_names = "\n".join([member.display_name for member in muted_members])
+    embed.add_field(name="Muted Users", value=muted_names, inline=False)
+
+    try:
+        await interaction.response.send_message(embed=embed)
+    except discord.HTTPException as e:
+        print(f"Failed to send muted users list: {e}")
+
+
+@bot.tree.command(name="warn", description="Warn a user with a reason.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def warn(interaction: discord.Interaction, user: discord.Member, reason: str):
+    # Send warning message in server channel
+    try:
+        await interaction.response.send_message(
+            f"{user.mention}, you have been warned for: {reason}"
+        )
+    except discord.HTTPException as e:
+        print(f"Failed to send warning message in server channel: {e}")
+
+    # Send warning message via DM
+    try:
+        await user.send(f"You have been warned in the server for: {reason}")
+        await interaction.response.send_message(
+            f"Warning sent to {user.mention} via DM."
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            f"Failed to send warning to {user.mention} via DM. They may have DMs disabled."
+        )
+    except discord.HTTPException as e:
+        print(f"Failed to send warning message via DM: {e}")
+
+
+@bot.tree.command(name="clear", description="Clear a specified number of messages.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def clear(interaction: discord.Interaction, amount: int):
+    if amount <= 0:
+        await interaction.response.send_message(
+            "Please specify a positive integer.", ephemeral=True
+        )
+        return
+
+    await interaction.response.defer()  # Acknowledge the interaction
+
+    try:
+        # Perform message deletion
+        deleted = await interaction.channel.purge(limit=amount + 1)
+
+        # Send ephemeral message indicating successful deletion
+        await interaction.followup.send(
+            f"Deleted {len(deleted) - 1} message(s).", ephemeral=True
+        )
+    except discord.Forbidden:
+        await interaction.followup.send(
+            "I do not have permission to delete messages.", ephemeral=True
+        )
+    except discord.HTTPException as e:
+        await interaction.followup.send(
+            f"Failed to delete messages. Error: {e}", ephemeral=True
+        )
+    except asyncio.TimeoutError:
+        await interaction.followup.send(
+            "Command timed out. Please try again.", ephemeral=True
+        )
+    except Exception as e:
+        await interaction.followup.send(
+            f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
+        )
+
+
+@bot.tree.command(name="lock", description="Lock a channel.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
+    try:
+        await channel.set_permissions(
+            interaction.guild.default_role, send_messages=False
+        )
+        await interaction.response.send_message(
+            f"🔒 Channel {channel.mention} has been locked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to manage channel permissions.", ephemeral=True
+        )
+    except Exception as e:
+        await interaction.response.send_message(
+            f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
+        )
+
+
+@bot.tree.command(name="unlock", description="Unlock a channel.")
+@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+async def unlock(interaction: discord.Interaction, channel: discord.TextChannel):
+    try:
+        await channel.set_permissions(
+            interaction.guild.default_role, send_messages=True
+        )
+        await interaction.response.send_message(
+            f"🔓 Channel {channel.mention} has been unlocked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to manage channel permissions.", ephemeral=True
+        )
+    except Exception as e:
+        await interaction.response.send_message(
+            f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
+        )
 
 
 # Run the bot with the token
