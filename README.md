@@ -5,7 +5,7 @@ PloitZ is a versatile and powerful Discord bot designed to enhance the experienc
 ## Features
 
 ### Essential Commands
-
+- **/help**: All commands and what they do.
 #### Moderation Commands
 - **/ban [user] [reason]**: Bans a user from the server.
 - **/kick [user] [reason]**: Kicks a user from the server.
