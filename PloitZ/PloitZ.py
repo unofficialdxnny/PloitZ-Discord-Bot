@@ -718,13 +718,20 @@ async def clear(interaction: discord.Interaction, amount: int):
         )
 
 
+# A dictionary to store the original permissions of channels before they were locked
+original_permissions = {}
+
+
 @bot.tree.command(name="lock", description="Lock a channel.")
 @app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
 async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
+    guild = interaction.guild
+
+    # Store the original permissions of the channel
+    original_permissions[channel.id] = channel.overwrites_for(guild.default_role)
+
     try:
-        await channel.set_permissions(
-            interaction.guild.default_role, send_messages=False
-        )
+        await channel.set_permissions(guild.default_role, send_messages=False)
         await interaction.response.send_message(
             f"🔒 Channel {channel.mention} has been locked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
         )
@@ -741,10 +748,21 @@ async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
 @bot.tree.command(name="unlock", description="Unlock a channel.")
 @app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
 async def unlock(interaction: discord.Interaction, channel: discord.TextChannel):
+    guild = interaction.guild
+
     try:
-        await channel.set_permissions(
-            interaction.guild.default_role, send_messages=True
-        )
+        # Restore the original permissions of the channel if they were stored
+        if channel.id in original_permissions:
+            await channel.set_permissions(
+                guild.default_role, overwrite=original_permissions[channel.id]
+            )
+            del original_permissions[
+                channel.id
+            ]  # Remove from dictionary after restoring
+        else:
+            # Default behavior if no original permissions were stored
+            await channel.set_permissions(guild.default_role, send_messages=True)
+
         await interaction.response.send_message(
             f"🔓 Channel {channel.mention} has been unlocked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
         )
@@ -1007,36 +1025,62 @@ if not os.path.exists(DATA_FILE):
         json.dump({}, file)
 
 
+# Load data from JSON
+def load_data():
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+        print(f"Loaded data: {data}")
+        return data
+
+
+# Save data to JSON
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+        print(f"Saved data: {data}")
+
+
+@bot.event
 @bot.event
 async def on_message(message):
-    if message.author.bot == False:
-        with open("users.json", "r") as f:
-            users = json.load(f)
-        await add_experience(users, message.author)
-        await level_up(users, message.author, message)
-        with open("users.json", "w") as f:
-            json.dump(users, f)
-            await bot.process_commands(message)
+    if message.author.bot:
+        return
+
+    users = load_data()
+    await add_experience(users, message.author)
+    await level_up(users, message.author, message)
+    save_data(users)
+
+    await bot.process_commands(message)
 
 
 async def add_experience(users, user):
-    if not f"{user.id}" in users:
-        users[f"{user.id}"] = {}
-        users[f"{user.id}"]["experience"] = 0
-        users[f"{user.id}"]["level"] = 0
-    users[f"{user.id}"]["experience"] += 6
-    print(f"{users[f'{user.id}']['level']}")
+    user_id = str(user.id)
+    if user_id not in users:
+        users[user_id] = {"experience": 0, "level": 0}
+
+    users[user_id]["experience"] += 6
+    print(
+        f"User {user_id} experience: {users[user_id]['experience']}, level: {users[user_id]['level']}"
+    )
+    # Optional: Uncomment the following line to see current data after each addition
+    # save_data(users)
 
 
 async def level_up(users, user, message):
-    experience = users[f"{user.id}"]["experience"]
-    lvl_start = users[f"{user.id}"]["level"]
+    user_id = str(user.id)
+    experience = users[user_id]["experience"]
+    lvl_start = users[user_id]["level"]
     lvl_end = int(experience ** (1 / 4))
+
     if lvl_start < lvl_end:
         await message.channel.send(
             f":tada: {user.mention} has reached level {lvl_end}. Congrats! :tada:"
         )
-        users[f"{user.id}"]["level"] = lvl_end
+        users[user_id]["level"] = lvl_end
+        print(f"User {user_id} leveled up to {lvl_end}")
+        # Optional: Uncomment the following line to see current data after leveling up
+        save_data(users)
 
 
 # Command: /level
