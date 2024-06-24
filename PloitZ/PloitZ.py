@@ -553,8 +553,8 @@ async def help_command(interaction: discord.Interaction):
         print(f"Failed to send help embed: {e}")
 
 
-# mute users
-muted_users = {}
+# A dictionary to store the roles of muted users
+muted_users_roles = {}
 
 
 @bot.tree.command(name="mute", description="Mute a user indefinitely.")
@@ -563,14 +563,19 @@ muted_users = {}
 async def mute(interaction: discord.Interaction, user: discord.Member):
     guild = interaction.guild
     muted_role = guild.get_role(MUTED_ROLE_ID)
+
     if not muted_role:
         await interaction.response.send_message(
             "Muted role not found. Please set up a role with the appropriate permissions."
         )
         return
 
-    # Mute the user
+    # Store the user's current roles and remove them
+    user_roles = user.roles[1:]  # Exclude @everyone role
+    muted_users_roles[user.id] = user_roles
+
     try:
+        await user.remove_roles(*user_roles)
         await user.add_roles(muted_role)
         await interaction.response.send_message(f"Muted {user.mention} indefinitely.")
     except discord.Forbidden:
@@ -589,15 +594,23 @@ async def mute(interaction: discord.Interaction, user: discord.Member):
 async def unmute(interaction: discord.Interaction, user: discord.Member):
     guild = interaction.guild
     muted_role = guild.get_role(MUTED_ROLE_ID)
+
     if not muted_role:
         await interaction.response.send_message(
             "Muted role not found. Please set up a role with the appropriate permissions."
         )
         return
 
-    # Unmute the user
+    if user.id not in muted_users_roles:
+        await interaction.response.send_message(f"{user.mention} is not muted.")
+        return
+
+    # Retrieve and restore the user's roles
+    user_roles = muted_users_roles.pop(user.id, [])
+
     try:
         await user.remove_roles(muted_role)
+        await user.add_roles(*user_roles)
         await interaction.response.send_message(f"Unmuted {user.mention}.")
     except discord.Forbidden:
         await interaction.response.send_message(
@@ -1042,6 +1055,28 @@ async def cmd_level(interaction: discord.Interaction):
         await interaction.response.send_message(
             f"{interaction.user.name}, you haven't leveled up yet!"
         )
+
+
+# @bot.event
+# async def on_guild_join(guild):
+#     with open("mutes.json", "r") as muted_users_file:
+#         mute_role = json.load(muted_users_file)
+
+#         mute_role[str(guild.id)] = None
+
+#     with open("mutes.json", "r") as muted_users_file:
+#         json.dumps(mute_role, muted_users_file, indent=4)
+
+
+# @bot.event()
+# async def on_guild_remove(guild):
+#     with open("mutes.json", "r") as muted_users_file:
+#         mute_role = json.load(muted_users_file)
+
+#         mute_role.pop(str(guild.id))
+
+#     with open("mutes.json", "r") as muted_users_file:
+#         json.dumps(mute_role, muted_users_file, indent=4)
 
 
 # Run the bot with the token
