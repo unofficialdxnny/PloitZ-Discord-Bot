@@ -12,7 +12,7 @@ from gtts import gTTS
 
 
 # Load environment variables from .env file
-load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "bot_config", ".env"))
 TOKEN = os.getenv("TOKEN")
 TEST_GUILD_ID = int(os.getenv("TEST_GUILD_ID", ""))  # Add your test guild ID here
 TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY", ""))
