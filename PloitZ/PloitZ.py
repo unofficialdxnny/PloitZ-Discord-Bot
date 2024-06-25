@@ -12,7 +12,7 @@ from gtts import gTTS
 
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
 TOKEN = os.getenv("TOKEN")
 TEST_GUILD_ID = int(os.getenv("TEST_GUILD_ID", ""))  # Add your test guild ID here
 TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY", ""))
@@ -510,8 +510,12 @@ async def close(interaction: discord.Interaction):
         )
 
 
+# Ensure data directories exist
+if not os.path.exists("./PloitZ/commands"):
+    os.makedirs("./PloitZ/commands")
+
 # Path to commands.json
-COMMANDS_FILE = os.path.join(os.path.dirname(__file__), "commands.json")
+COMMANDS_FILE = os.path.join("./PloitZ/commands", "commands.json")
 
 
 # Read commands from commands.json
@@ -519,6 +523,7 @@ def read_commands():
     try:
         with open(COMMANDS_FILE, "r") as f:
             commands_data = json.load(f)
+        print(f"Loaded commands: {commands_data}")
         return commands_data
     except FileNotFoundError:
         print(f"FileNotFoundError: '{COMMANDS_FILE}' not found.")
@@ -1004,13 +1009,20 @@ async def roll(interaction: discord.Interaction, max_number: int):
     await interaction.response.send_message(f"🎲 You rolled: {rolled_number}")
 
 
-DATA_FILE = "users.json"
+DATA_DIR = "./PloitZ/data"
+DATA_FILE = os.path.join(DATA_DIR, "users.json")
+
+# Ensure data directories exist
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
 
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as file:
-            return json.load(file)
+            data = json.load(file)
+            print(f"Loaded data: {data}")
+            return data
     else:
         return {}
 
@@ -1019,30 +1031,9 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, "w") as file:
         json.dump(data, file, indent=4)
-
-
-# Ensure data file exists
-if not os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "w") as file:
-        json.dump({}, file)
-
-
-# Load data from JSON
-def load_data():
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-        print(f"Loaded data: {data}")
-        return data
-
-
-# Save data to JSON
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
         print(f"Saved data: {data}")
 
 
-@bot.event
 @bot.event
 async def on_message(message):
     if message.author.bot:
@@ -1106,14 +1097,14 @@ async def cmd_level(interaction: discord.Interaction):
 # Command: /xp
 @bot.tree.command(name="xp", description="Check your current experience.")
 @app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
-async def cmd_level(interaction: discord.Interaction):
+async def cmd_xp(interaction: discord.Interaction):
     user_id = str(interaction.user.id)
     user_data = load_data()
 
     if user_id in user_data:
         experience = user_data[user_id]["experience"]
         await interaction.response.send_message(
-            f"{interaction.user.name}, your current level is {experience}"
+            f"{interaction.user.name}, your current experience is {experience}"
         )
     else:
         await interaction.response.send_message(
@@ -1121,53 +1112,48 @@ async def cmd_level(interaction: discord.Interaction):
         )
 
 
-# Ensure data directories exist
-if not os.path.exists("audio"):
-    os.makedirs("audio")
+# # Function to generate TTS audio file
+# def generate_tts_audio(text, filename):
+#     # List of available languages for gTTS
+#     languages = ["en", "es", "fr", "de", "it"]
+#     lang = random.choice(languages)
+
+#     tts = gTTS(text=text, lang=lang)
+#     tts.save(filename)
 
 
-# Function to generate TTS audio file
-def generate_tts_audio(text, filename):
-    # List of available languages for gTTS
-    languages = ["en", "es", "fr", "de", "it"]
-    lang = random.choice(languages)
+# # Command to say a phrase using a random voice
+# @bot.tree.command(name="say", description="Say a phrase in a random voice")
+# @app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+# async def say(interaction: discord.Interaction, phrase: str):
+#     voice_channel = interaction.user.voice.channel if interaction.user.voice else None
 
-    tts = gTTS(text=text, lang=lang)
-    tts.save(filename)
+#     if not voice_channel:
+#         await interaction.response.send_message(
+#             "You need to be in a voice channel to use this command.", ephemeral=True
+#         )
+#         return
 
+#     # Generate TTS audio file
+#     audio_file = f"audio/{interaction.id}.mp3"
+#     generate_tts_audio(phrase, audio_file)
 
-# Command to say a phrase using a random voice
-@bot.tree.command(name="say", description="Say a phrase in a random voice")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
-async def say(interaction: discord.Interaction, phrase: str):
-    voice_channel = interaction.user.voice.channel if interaction.user.voice else None
+#     # Connect to voice channel and play audio
+#     vc = await voice_channel.connect()
+#     vc.play(
+#         discord.FFmpegPCMAudio(audio_file),
+#         after=lambda e: print(f"Finished playing: {e}"),
+#     )
 
-    if not voice_channel:
-        await interaction.response.send_message(
-            "You need to be in a voice channel to use this command.", ephemeral=True
-        )
-        return
+#     # Wait for the audio to finish playing
+#     while vc.is_playing():
+#         await asyncio.sleep(1)
 
-    # Generate TTS audio file
-    audio_file = f"audio/{interaction.id}.mp3"
-    generate_tts_audio(phrase, audio_file)
+#     # Disconnect and clean up
+#     await vc.disconnect()
+#     os.remove(audio_file)
 
-    # Connect to voice channel and play audio
-    vc = await voice_channel.connect()
-    vc.play(
-        discord.FFmpegPCMAudio(audio_file),
-        after=lambda e: print(f"Finished playing: {e}"),
-    )
-
-    # Wait for the audio to finish playing
-    while vc.is_playing():
-        await asyncio.sleep(1)
-
-    # Disconnect and clean up
-    await vc.disconnect()
-    os.remove(audio_file)
-
-    await interaction.response.send_message(f"Said the phrase: {phrase}")
+#     await interaction.response.send_message(f"Said the phrase: {phrase}")
 
 
 # Run the bot with the token
