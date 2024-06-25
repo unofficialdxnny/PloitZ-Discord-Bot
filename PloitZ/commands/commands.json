@@ -53,6 +53,14 @@
         {
             "name": "poll",
             "description": "Creates a poll for users to vote on."
+        },
+        {
+            "name": "level",
+            "description": "Find your level on the server"
+        },
+        {
+            "name": "xp",
+            "description": "Find your xp on the server"
         }
     ],
     "Fun and Engagement": [
