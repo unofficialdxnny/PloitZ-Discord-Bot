@@ -515,7 +515,7 @@ if not os.path.exists("./PloitZ/commands"):
     os.makedirs("./PloitZ/commands")
 
 # Path to commands.json
-COMMANDS_FILE = os.path.join("./PloitZ/commands", "commands.json")
+COMMANDS_FILE = os.path.join("/commands", "commands.json")
 
 
 # Read commands from commands.json
