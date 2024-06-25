@@ -12,9 +12,9 @@ from gtts import gTTS
 
 
 # Load environment variables from .env file
-load_dotenv(os.path.join(os.path.dirname(__file__), "bot_config", ".env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
 TOKEN = os.getenv("TOKEN")
-TEST_GUILD_ID = int(os.getenv("TEST_GUILD_ID", ""))  # Add your test guild ID here
+SERVER_ID = int(os.getenv("SERVER_ID", ""))  # Add your test guild ID here
 TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY", ""))
 
 
@@ -127,10 +127,10 @@ async def on_ready():
 
     try:
         # Sync guild-specific commands
-        test_guild = discord.Object(id=TEST_GUILD_ID)
+        test_guild = discord.Object(id=SERVER_ID)
         synced_guild = await bot.tree.sync(guild=test_guild)
         print(
-            f"Successfully synced {len(synced_guild)} guild command(s) in {TEST_GUILD_ID}"
+            f"Successfully synced {len(synced_guild)} guild command(s) in {SERVER_ID}"
         )
     except Exception as e:
         print(f"Error syncing guild commands: {e}")
@@ -196,7 +196,7 @@ async def on_member_join(member):
 # ban command
 @bot.tree.command(name="ban", description="Bans a user from the server.")
 @app_commands.checks.has_permissions(ban_members=True)
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def ban_user(
     interaction: discord.Interaction, user: discord.User, reason: str = None
 ):
@@ -218,7 +218,7 @@ async def ban_user(
 # kick command
 @bot.tree.command(name="kick", description="Kicks a user from the server.")
 @app_commands.checks.has_permissions(kick_members=True)
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def kick_user(
     interaction: discord.Interaction, user: discord.User, reason: str = None
 ):
@@ -240,7 +240,7 @@ async def kick_user(
 # Slash command to check bot ping
 @bot.tree.command(name="ping", description="Check the bot's ping.")
 @app_commands.checks.has_permissions(manage_messages=True)
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def ping(interaction: discord.Interaction):
     latency = bot.latency * 1000  # Convert to milliseconds
     await interaction.response.send_message(f"Pong! {latency:.2f}ms")
@@ -248,7 +248,7 @@ async def ping(interaction: discord.Interaction):
 
 # Slash command to get user information
 @bot.tree.command(name="user", description="Get information about a user.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def get_user_info(interaction: discord.Interaction, user: discord.Member = None):
     if user is None:
         await interaction.response.send_message("Please specify a user.")
@@ -329,7 +329,7 @@ async def get_user_info(interaction: discord.Interaction, user: discord.Member =
 
 # Slash command to get user avatar
 @bot.tree.command(name="avatar", description="Get the avatar of a user.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def avatar(interaction: discord.Interaction, user: discord.Member = None):
     # Ensure the user mentioned is a valid Discord user
     if user is not None:
@@ -353,7 +353,7 @@ async def avatar(interaction: discord.Interaction, user: discord.Member = None):
 
 
 @bot.tree.command(name="serverinfo", description="Show information about the server.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def server_info(interaction: discord.Interaction):
     guild = interaction.guild
 
@@ -392,7 +392,7 @@ async def server_info(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="ticket", description="Create a support ticket.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def ticket(interaction: discord.Interaction, problem: str):
     guild = interaction.guild
     user = interaction.user  # Get the user who invoked the command
@@ -453,7 +453,7 @@ async def ticket(interaction: discord.Interaction, problem: str):
 
 
 @bot.tree.command(name="close", description="Close a support ticket.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def close(interaction: discord.Interaction):
     guild = interaction.guild
     author = interaction.user
@@ -536,7 +536,7 @@ def read_commands():
 
 
 @bot.tree.command(name="help", description="Show all available commands.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def help_command(interaction: discord.Interaction):
     commands_data = read_commands()
 
@@ -566,7 +566,7 @@ muted_users_roles = {}
 
 @bot.tree.command(name="mute", description="Mute a user indefinitely.")
 @app_commands.checks.has_permissions(manage_roles=True)
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def mute(interaction: discord.Interaction, user: discord.Member):
     guild = interaction.guild
     muted_role = guild.get_role(MUTED_ROLE_ID)
@@ -597,7 +597,7 @@ async def mute(interaction: discord.Interaction, user: discord.Member):
 
 @bot.tree.command(name="unmute", description="Unmute a user.")
 @app_commands.checks.has_permissions(manage_roles=True)
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def unmute(interaction: discord.Interaction, user: discord.Member):
     guild = interaction.guild
     muted_role = guild.get_role(MUTED_ROLE_ID)
@@ -630,7 +630,7 @@ async def unmute(interaction: discord.Interaction, user: discord.Member):
 
 
 @bot.tree.command(name="muted", description="List all currently muted users.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def muted(interaction: discord.Interaction):
     guild = interaction.guild
     muted_role = guild.get_role(MUTED_ROLE_ID)
@@ -664,7 +664,7 @@ async def muted(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="warn", description="Warn a user with a reason.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def warn(interaction: discord.Interaction, user: discord.Member, reason: str):
     # Send warning message in server channel
     try:
@@ -689,7 +689,7 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
 
 
 @bot.tree.command(name="clear", description="Clear a specified number of messages.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def clear(interaction: discord.Interaction, amount: int):
     if amount <= 0:
         await interaction.response.send_message(
@@ -730,7 +730,7 @@ original_permissions = {}
 
 
 @bot.tree.command(name="lock", description="Lock a channel.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
     guild = interaction.guild
 
@@ -753,7 +753,7 @@ async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
 
 
 @bot.tree.command(name="unlock", description="Unlock a channel.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def unlock(interaction: discord.Interaction, channel: discord.TextChannel):
     guild = interaction.guild
 
@@ -784,7 +784,7 @@ async def unlock(interaction: discord.Interaction, channel: discord.TextChannel)
 
 
 @bot.tree.command(name="roleinfo", description="Get information about a role.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 @app_commands.describe(role="Select a role to get information about")
 async def roleinfo(interaction: discord.Interaction, role: str):
     guild = interaction.guild
@@ -826,7 +826,7 @@ async def role_autocomplete(interaction: discord.Interaction, current: str):
 
 
 @bot.tree.command(name="poll", description="Create a poll")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 @app_commands.describe(
     question="The poll question",
     option1="First option",
@@ -885,7 +885,7 @@ async def fetch_meme(query=None):
 @bot.tree.command(
     name="meme", description="Send a random meme or a meme about a specific topic."
 )
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 @app_commands.describe(topic="Optional topic for the meme")
 async def meme(interaction: discord.Interaction, topic: str = None):
     meme_url = await fetch_meme(topic)
@@ -915,7 +915,7 @@ async def fetch_joke(joke_type=None):
 
 
 @bot.tree.command(name="joke", description="Tell a random joke.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 @app_commands.describe(joke_type="Type of joke (funny, sarcastic, dad)")
 async def joke(interaction: discord.Interaction, joke_type: str = None):
     joke_text = await fetch_joke(joke_type)
@@ -949,7 +949,7 @@ async def send_quote():
 
 
 @bot.tree.command(name="quote", description="Send a random inspirational quote.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def quote(interaction: discord.Interaction):
     quote_text = await fetch_quote()
     if quote_text:
@@ -962,7 +962,7 @@ async def quote(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="8ball", description="Ask the magic 8-ball a question.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 @app_commands.describe(question="The question you want to ask the magic 8-ball")
 async def eight_ball(interaction: discord.Interaction, question: str):
     responses = [
@@ -996,7 +996,7 @@ async def eight_ball(interaction: discord.Interaction, question: str):
 @bot.tree.command(
     name="roll", description="Rolls a random number between 1 and the specified number."
 )
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 @app_commands.describe(max_number="The maximum number to roll (inclusive)")
 async def roll(interaction: discord.Interaction, max_number: int):
     if max_number < 1:
@@ -1078,7 +1078,7 @@ async def level_up(users, user, message):
 
 # Command: /level
 @bot.tree.command(name="level", description="Check your current level.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def cmd_level(interaction: discord.Interaction):
     user_id = str(interaction.user.id)
     user_data = load_data()
@@ -1096,7 +1096,7 @@ async def cmd_level(interaction: discord.Interaction):
 
 # Command: /xp
 @bot.tree.command(name="xp", description="Check your current experience.")
-@app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+@app_commands.guilds(discord.Object(id=SERVER_ID))
 async def cmd_xp(interaction: discord.Interaction):
     user_id = str(interaction.user.id)
     user_data = load_data()
@@ -1124,7 +1124,7 @@ async def cmd_xp(interaction: discord.Interaction):
 
 # # Command to say a phrase using a random voice
 # @bot.tree.command(name="say", description="Say a phrase in a random voice")
-# @app_commands.guilds(discord.Object(id=TEST_GUILD_ID))
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
 # async def say(interaction: discord.Interaction, phrase: str):
 #     voice_channel = interaction.user.voice.channel if interaction.user.voice else None
 
