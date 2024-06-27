@@ -85,24 +85,6 @@
             "description": "Rolls a random number between 1 and the specified number."
         }
     ],
-    "Music": [
-        {
-            "name": "play",
-            "description": "Plays a song in a voice channel. (coming soon)"
-        },
-        {
-            "name": "skip",
-            "description": "Skips the currently playing song. (coming soon)"
-        },
-        {
-            "name": "queue",
-            "description": "Displays the current music queue. (coming soon)"
-        },
-        {
-            "name": "stop",
-            "description": "Stops the music and clears the queue. (coming soon)"
-        }
-    ],
     "Leveling": [
         {
             "name": "level",
@@ -132,10 +114,6 @@
         }
     ],
     "Administration Commands": [
-        {
-            "name": "setprefix",
-            "description": "Changes the bot’s command prefix."
-        },
         {
             "name": "disablecommand",
             "description": "Disables a specific command in the server."

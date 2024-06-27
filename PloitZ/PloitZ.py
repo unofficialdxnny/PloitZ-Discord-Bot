@@ -511,11 +511,11 @@ async def close(interaction: discord.Interaction):
 
 
 # Ensure data directories exist
-if not os.path.exists("./PloitZ/commands"):
-    os.makedirs("./PloitZ/commands")
+if not os.path.exists("./commands"):
+    os.makedirs("./commands")
 
 # Path to commands.json
-COMMANDS_FILE = os.path.join("/commands", "commands.json")
+COMMANDS_FILE = os.path.join("./commands", "commands.json")
 
 
 # Read commands from commands.json
@@ -1009,7 +1009,7 @@ async def roll(interaction: discord.Interaction, max_number: int):
     await interaction.response.send_message(f"🎲 You rolled: {rolled_number}")
 
 
-DATA_DIR = "./PloitZ/data"
+DATA_DIR = "./data"
 DATA_FILE = os.path.join(DATA_DIR, "users.json")
 
 # Ensure data directories exist
