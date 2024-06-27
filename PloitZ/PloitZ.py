@@ -1112,49 +1112,5 @@ async def cmd_xp(interaction: discord.Interaction):
         )
 
 
-# # Function to generate TTS audio file
-# def generate_tts_audio(text, filename):
-#     # List of available languages for gTTS
-#     languages = ["en", "es", "fr", "de", "it"]
-#     lang = random.choice(languages)
-
-#     tts = gTTS(text=text, lang=lang)
-#     tts.save(filename)
-
-
-# # Command to say a phrase using a random voice
-# @bot.tree.command(name="say", description="Say a phrase in a random voice")
-# @app_commands.guilds(discord.Object(id=SERVER_ID))
-# async def say(interaction: discord.Interaction, phrase: str):
-#     voice_channel = interaction.user.voice.channel if interaction.user.voice else None
-
-#     if not voice_channel:
-#         await interaction.response.send_message(
-#             "You need to be in a voice channel to use this command.", ephemeral=True
-#         )
-#         return
-
-#     # Generate TTS audio file
-#     audio_file = f"audio/{interaction.id}.mp3"
-#     generate_tts_audio(phrase, audio_file)
-
-#     # Connect to voice channel and play audio
-#     vc = await voice_channel.connect()
-#     vc.play(
-#         discord.FFmpegPCMAudio(audio_file),
-#         after=lambda e: print(f"Finished playing: {e}"),
-#     )
-
-#     # Wait for the audio to finish playing
-#     while vc.is_playing():
-#         await asyncio.sleep(1)
-
-#     # Disconnect and clean up
-#     await vc.disconnect()
-#     os.remove(audio_file)
-
-#     await interaction.response.send_message(f"Said the phrase: {phrase}")
-
-
 # Run the bot with the token
 bot.run(TOKEN)

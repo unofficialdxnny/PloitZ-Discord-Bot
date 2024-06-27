@@ -99,6 +99,12 @@
             "description": "Allows users to purchase items from the shop. (coming soon)"
         }
     ],
+    "Services": [
+        {
+            "name": "Snapify",
+            "description": "Sends latest release to users"
+        }
+    ],
     "Event and Reminder Commands": [
         {
             "name": "event",
