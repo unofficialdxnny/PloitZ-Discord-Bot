@@ -31,6 +31,18 @@
         {
             "name": "unlock",
             "description": "Unlocks a channel."
+        },
+        {
+            "name": "nick",
+            "description": "Change a user's nickname."
+        },
+        {
+            "name": "addrole",
+            "description": "Adds a role to a user."
+        },
+        {
+            "name": "removerole",
+            "description": "Removes a role from a user."
         }
     ],
     "Utility": [
@@ -55,12 +67,8 @@
             "description": "Creates a poll for users to vote on."
         },
         {
-            "name": "level",
-            "description": "Find your level on the server"
-        },
-        {
-            "name": "xp",
-            "description": "Find your xp on the server"
+            "name": "disable",
+            "description": "Disables a specified command."
         }
     ],
     "Fun and Engagement": [
@@ -91,46 +99,20 @@
             "description": "Displays the user’s level in the server."
         },
         {
-            "name": "shop",
-            "description": "Displays items available for purchase with the server’s currency. (coming soon)"
-        },
-        {
-            "name": "buy",
-            "description": "Allows users to purchase items from the shop. (coming soon)"
+            "name": "xp",
+            "description": "Displays the user's XP in the server."
         }
     ],
     "Services": [
         {
             "name": "Snapify",
-            "description": "Sends latest release to users"
+            "description": "Sends latest release to users."
         }
     ],
-    "Event and Reminder Commands": [
+    "Moderation Tools": [
         {
-            "name": "event",
-            "description": "Creates a server event with specific details."
-        },
-        {
-            "name": "remindme",
-            "description": "Sets a personal reminder for the user."
-        },
-        {
-            "name": "reminder",
-            "description": "Sets a server-wide reminder for an event or announcement."
-        }
-    ],
-    "Administration Commands": [
-        {
-            "name": "disablecommand",
-            "description": "Disables a specific command in the server."
-        },
-        {
-            "name": "enablecommand",
-            "description": "Enables a previously disabled command."
-        },
-        {
-            "name": "logchannel",
-            "description": "Sets a specific channel for logging moderation actions and events."
+            "name": "slowmode",
+            "description": "Set slowmode in a channel."
         }
     ]
 }

@@ -9,48 +9,14 @@ import asyncio
 import aiohttp
 import random
 from gtts import gTTS
-
+from pypresence import Presence
+import time
 
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
 TOKEN = os.getenv("TOKEN")
 SERVER_ID = int(os.getenv("SERVER_ID", ""))  # Add your test guild ID here
 TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY", ""))
-
-
-# # File to store settings
-# SETTINGS_FILE = "./PloitZ/settings.json"
-
-# # Initialize settings with an empty dictionary
-# settings = {}
-
-
-# def load_settings():
-#     global settings
-#     try:
-#         if os.path.exists(SETTINGS_FILE):
-#             with open(SETTINGS_FILE, "r") as f:
-#                 settings = json.load(f)
-#                 print("Settings loaded successfully.")
-#         else:
-#             save_settings()  # Create an empty settings file if it doesn't exist
-#     except json.JSONDecodeError:
-#         settings = {}  # Initialize with empty dictionary if file is empty or invalid
-#     except Exception as e:
-#         print(f"Error loading settings: {e}")
-
-
-# def save_settings():
-#     try:
-#         with open(SETTINGS_FILE, "w") as f:
-#             json.dump(settings, f, indent=4)
-#         print("Settings saved successfully.")
-#     except Exception as e:
-#         print(f"Error saving settings: {e}")
-
-
-# # Load settings on startup
-# load_settings()
 
 
 # Initialize bot
@@ -62,6 +28,27 @@ intents.members = True  # Enable member intents
 intents.presences = True  # Enable presence intents
 intents.guild_messages = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+# Discord RPC
+client_id = "1250734092371099728"  # Replace with your application's client ID
+rpc = Presence(client_id)
+
+try:
+    rpc.connect()
+    print("Connected to Discord RPC")
+except Exception as e:
+    print(f"Failed to connect to Discord RPC: {e}")
+
+
+def update_rpc():
+    try:
+        rpc.update(
+            state="Watching PloitZ",
+            details="Admin",
+            large_image="9ecdec431dfaaec997452fe6abe31fe1",
+        )
+        print("RPC updated successfully")
+    except Exception as e:
+        print(f"Failed to update RPC: {e}")
 
 
 WELCOME_CHANNEL_ID = int(os.getenv("WELCOME_CHANNEL_ID"))
@@ -72,6 +59,8 @@ REACTION_EMOJI = "✅"
 UNVERIFIED_ROLE_ID = int(os.getenv("UNVERIFIED_ROLE_ID"))
 MUTED_ROLE_ID = int(os.getenv("MUTED_ROLE_ID", ""))
 GENERAL_CHANNEL_ID = int(os.getenv("GENERAL_CHANNEL_ID", ""))
+MEMBER_CHANNEL_ID = int(os.getenv("MEMBER_CHANNEL_ID"))
+BOT_CHANNEL_ID = int(os.getenv("BOT_CHANNEL_ID"))
 
 
 @bot.event
@@ -101,7 +90,7 @@ async def on_ready():
             embed = discord.Embed(
                 title="Verification",
                 description="React with ✅ to verify yourself and gain access to the server.",
-                color=discord.Color.blue(),
+                color=discord.Color.from_rgb(254, 254, 254),
             )
 
             # Send the verification embed message
@@ -117,8 +106,8 @@ async def on_ready():
 
         await bot.change_presence(
             activity=discord.Activity(
-                type=discord.ActivityType.watching,
-                name=f"{members} members",
+                type=discord.ActivityType.playing,
+                name=f"/help",
             )
         )
 
@@ -177,7 +166,7 @@ async def on_member_join(member):
         embed = discord.Embed(
             title=f"Welcome to {member.guild.name}, {member.name}!",
             description=f"We are glad you joined us. Please read the rules in <#{RULES_CHANNEL_ID}> and enjoy your stay!",
-            color=discord.Color.blue(),
+            color=discord.Color.from_rgb(254, 254, 254),
         )
         embed.set_thumbnail(url=avatar_url)  # Set member's avatar as thumbnail
         embed.set_footer(
@@ -303,7 +292,7 @@ async def get_user_info(interaction: discord.Interaction, user: discord.Member =
     # Create an embed with user information
     embed = discord.Embed(
         title=f"User Information - {username}#{discriminator}",
-        color=discord.Color.blue(),
+        color=discord.Color.from_rgb(254, 254, 254),
         timestamp=datetime.utcnow(),
     )
     embed.set_thumbnail(url=avatar_url)
@@ -339,7 +328,7 @@ async def avatar(interaction: discord.Interaction, user: discord.Member = None):
         # Create an embed with the avatar image
         embed = discord.Embed(
             title=f"Avatar of {user.name}#{user.discriminator}",
-            color=discord.Color.blue(),
+            color=discord.Color.from_rgb(254, 254, 254),
         )
         embed.set_image(url=avatar_url)
 
@@ -370,7 +359,8 @@ async def server_info(interaction: discord.Interaction):
 
         # Creating an embed with server information
         embed = discord.Embed(
-            title=f"Server Information - {guild_name}", color=discord.Color.blue()
+            title=f"Server Information - {guild_name}",
+            color=discord.Color.from_rgb(254, 254, 254),
         )
         embed.set_thumbnail(url=guild.icon.url if guild.icon else discord.Embed.Empty)
         embed.add_field(name="Server ID", value=guild_id, inline=False)
@@ -437,14 +427,14 @@ async def ticket(interaction: discord.Interaction, problem: str):
     embed = discord.Embed(
         title="Support Ticket",
         description=f"**User:** {user.mention}\n**Problem:** {problem}",
-        color=discord.Color.blue(),
+        color=discord.Color.from_rgb(254, 254, 254),
     )
 
     # Send the embed to the support ticket channel
     try:
         await ticket_channel.send(embed=embed)
         await interaction.response.send_message(
-            f"Support ticket created in {ticket_channel.mention}."
+            f"Support ticket created in {ticket_channel.mention}.", ephemeral=True
         )
     except discord.HTTPException:
         await interaction.response.send_message(
@@ -543,7 +533,7 @@ async def help_command(interaction: discord.Interaction):
     embed = discord.Embed(
         title="PloitZ Bot Commands",
         description="Here are the available commands categorized:",
-        color=discord.Color.blue(),
+        color=discord.Color.from_rgb(254, 254, 254),
     )
 
     for category, commands_list in commands_data.items():
@@ -651,7 +641,7 @@ async def muted(interaction: discord.Interaction):
     embed = discord.Embed(
         title="Currently Muted Users",
         description="List of users currently muted in the server.",
-        color=discord.Color.blue(),
+        color=discord.Color.from_rgb(254, 254, 254),
     )
 
     muted_names = "\n".join([member.display_name for member in muted_members])
@@ -697,16 +687,13 @@ async def clear(interaction: discord.Interaction, amount: int):
         )
         return
 
-    await interaction.response.defer()  # Acknowledge the interaction
+    await interaction.response.defer(ephemeral=True)  # Acknowledge the interaction
 
     try:
         # Perform message deletion
         deleted = await interaction.channel.purge(limit=amount + 1)
-
         # Send ephemeral message indicating successful deletion
-        await interaction.followup.send(
-            f"Deleted {len(deleted) - 1} message(s).", ephemeral=True
-        )
+        await interaction.followup.send(f"Deleted {len(deleted) - 1} message(s).")
     except discord.Forbidden:
         await interaction.followup.send(
             "I do not have permission to delete messages.", ephemeral=True
@@ -851,7 +838,9 @@ async def poll(
 
     # Create the poll embed
     embed = discord.Embed(
-        title="Poll", description=question, color=discord.Color.blue()
+        title="Poll",
+        description=question,
+        color=discord.Color.from_rgb(254, 254, 254),
     )
     options = [option1, option2, option3, option4]
     options = [opt for opt in options if opt]  # Filter out None values
@@ -1111,6 +1100,136 @@ async def cmd_xp(interaction: discord.Interaction):
             f"{interaction.user.name}, you haven't leveled up yet!"
         )
 
+
+# service commands
+
+
+@bot.tree.command(name="snapify", description="Get information about Snapify app")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def snapify(interaction: discord.Interaction):
+    # Create an embedded message with information about Snapify
+    embed = discord.Embed(
+        title="Snapify - Snapscore Booster",
+        description="Boost your Snapscore with Snapify!",
+        color=discord.Color.from_rgb(254, 254, 254),
+    )
+    embed.add_field(
+        name="Features", value="Increase your Snapscore quickly and easily."
+    )
+    embed.add_field(
+        name="How to Use",
+        value="Simply install the Snapify app and follow the instructions.",
+    )
+    embed.set_image(
+        url="https://repository-images.githubusercontent.com/540961388/908c0ce5-f9f9-45d4-be36-6e485ae33111"
+    )  # Replace with your image URL
+
+    # Send the embed message in the server
+    await interaction.response.send_message("Check out Snapify!", embed=embed)
+
+    # Send a private message to the user
+    await interaction.user.send(
+        "Thank you for your interest in Snapify! Check the server for more details. Here is your Snapify release... https://github.com/unofficialdxnny/Snapify"
+    )
+
+
+def admin_only():
+    async def predicate(interaction: discord.Interaction):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "You do not have permission to use this command.", ephemeral=True
+            )
+            return False
+        return True
+
+    return app_commands.check(predicate)
+
+
+@bot.tree.command(name="nick", description="Change a user's nickname.")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def nick(
+    interaction: discord.Interaction, user: discord.Member, *, nickname: str
+):
+    try:
+        await user.edit(nick=nickname)
+        await interaction.response.send_message(
+            f"Changed nickname for {user.mention} to `{nickname}`", ephemeral=True
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to change that user's nickname.", ephemeral=True
+        )
+    except discord.HTTPException as e:
+        await interaction.response.send_message(
+            f"Failed to change nickname. Error: {e}", ephemeral=True
+        )
+
+
+@bot.tree.command(name="addrole", description="Add a role to a user.")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def addrole(
+    interaction: discord.Interaction, user: discord.Member, role: discord.Role
+):
+    try:
+        await user.add_roles(role)
+        await interaction.response.send_message(
+            f"Added role {role.name} to {user.mention}", ephemeral=True
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to add roles.", ephemeral=True
+        )
+    except discord.HTTPException as e:
+        await interaction.response.send_message(
+            f"Failed to add role. Error: {e}", ephemeral=True
+        )
+
+
+@bot.tree.command(name="removerole", description="Remove a role from a user.")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def removerole(
+    interaction: discord.Interaction, user: discord.Member, role: discord.Role
+):
+    try:
+        await user.remove_roles(role)
+        await interaction.response.send_message(
+            f"Removed role {role.name} from {user.mention}", ephemeral=True
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to remove roles.", ephemeral=True
+        )
+    except discord.HTTPException as e:
+        await interaction.response.send_message(
+            f"Failed to remove role. Error: {e}", ephemeral=True
+        )
+
+
+@bot.tree.command(name="slowmode", description="Set slowmode in a channel.")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def slowmode(interaction: discord.Interaction, seconds: int):
+    try:
+        await interaction.channel.edit(slowmode_delay=seconds)
+        await interaction.response.send_message(
+            f"Set slowmode to {seconds} seconds in {interaction.channel.mention}",
+            ephemeral=True,
+        )
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "I do not have permission to set slowmode in this channel.", ephemeral=True
+        )
+    except discord.HTTPException as e:
+        await interaction.response.send_message(
+            f"Failed to set slowmode. Error: {e}", ephemeral=True
+        )
+
+
+# Start the bot
+# Start the bot
 
 # Run the bot with the token
 bot.run(TOKEN)
