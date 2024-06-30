@@ -1138,6 +1138,48 @@ async def cmd_leaderboard(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 
+@bot.tree.command(name="invite", description="Check the number of invites for a user.")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def cmd_invite(interaction: discord.Interaction, required_user: discord.Member):
+    user_data = load_data()
+
+    if str(required_user.id) in user_data:
+        num_invites = user_data[str(required_user.id)].get("invites", 0)
+        embed = discord.Embed(
+            title=f"{required_user.name}'s Invites",
+            description=f"{required_user.name} has {num_invites} invites.",
+            color=discord.Color.from_rgb(254, 254, 254),
+        )
+        try:
+            await interaction.response.send_message(embed=embed)
+        except discord.HTTPException as e:
+            print(f"Failed to send invite embed: {e}")
+    else:
+        try:
+            await interaction.response.send_message(
+                f"No invite data found for {required_user.name}."
+            )
+        except discord.HTTPException as e:
+            print(f"Failed to send invite data not found message: {e}")
+
+
+@bot.event
+async def on_member_join(member):
+    inviter = member.guild.fetch_inviter(member)
+    user_data = load_data()
+
+    if inviter:
+        inviter_id = str(inviter.id)
+        if inviter_id in user_data:
+            user_data[inviter_id]["invites"] = (
+                user_data[inviter_id].get("invites", 0) + 1
+            )
+        else:
+            user_data[inviter_id] = {"invites": 1}
+
+        save_data(user_data)
+
+
 # service commands
 
 
