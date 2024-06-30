@@ -1,0 +1,5 @@
+aiohttp==3.9.5
+discord.py==2.3.2
+gTTS==2.5.1
+pypresence==4.3.0
+python-dotenv==1.0.1

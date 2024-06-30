@@ -1,50 +1,4 @@
 {
-    "Moderation": [
-        {
-            "name": "ban",
-            "description": "Bans a user from the server."
-        },
-        {
-            "name": "kick",
-            "description": "Kicks a user from the server."
-        },
-        {
-            "name": "mute",
-            "description": "Mutes a user for a specified duration."
-        },
-        {
-            "name": "unmute",
-            "description": "Unmutes a user."
-        },
-        {
-            "name": "warn",
-            "description": "Issues a warning to a user."
-        },
-        {
-            "name": "clear",
-            "description": "Deletes a specified number of messages from a channel."
-        },
-        {
-            "name": "lock",
-            "description": "Locks a channel, preventing users from sending messages."
-        },
-        {
-            "name": "unlock",
-            "description": "Unlocks a channel."
-        },
-        {
-            "name": "nick",
-            "description": "Change a user's nickname."
-        },
-        {
-            "name": "addrole",
-            "description": "Adds a role to a user."
-        },
-        {
-            "name": "removerole",
-            "description": "Removes a role from a user."
-        }
-    ],
     "Utility": [
         {
             "name": "ping",
@@ -101,6 +55,10 @@
         {
             "name": "xp",
             "description": "Displays the user's XP in the server."
+        },
+        {
+            "name": "leaderboard",
+            "description": "Displays the top users by level or XP."
         }
     ],
     "Services": [
@@ -109,10 +67,76 @@
             "description": "Sends latest release to users."
         }
     ],
-    "Moderation Tools": [
+    "Moderation": [
+        {
+            "name": "ban",
+            "description": "Bans a user from the server."
+        },
+        {
+            "name": "kick",
+            "description": "Kicks a user from the server."
+        },
+        {
+            "name": "mute",
+            "description": "Mutes a user for a specified duration."
+        },
+        {
+            "name": "unmute",
+            "description": "Unmutes a user."
+        },
+        {
+            "name": "warn",
+            "description": "Issues a warning to a user."
+        },
+        {
+            "name": "clear",
+            "description": "Deletes a specified number of messages from a channel."
+        },
+        {
+            "name": "lock",
+            "description": "Locks a channel, preventing users from sending messages."
+        },
+        {
+            "name": "unlock",
+            "description": "Unlocks a channel."
+        },
+        {
+            "name": "nick",
+            "description": "Change a user's nickname."
+        },
+        {
+            "name": "addrole",
+            "description": "Adds a role to a user."
+        },
+        {
+            "name": "removerole",
+            "description": "Removes a role from a user."
+        },
         {
             "name": "slowmode",
             "description": "Set slowmode in a channel."
+        },
+        {
+            "name": "purge",
+            "description": "Deletes a specified number of messages from a specific user."
+        },
+        {
+            "name": "banlist",
+            "description": "Displays a list of banned users in the server."
+        }
+    ],
+    "Events": [
+        {
+            "name": "on_raw_reaction_add",
+            "description": "Assigns a role to a user when they react with a specific emoji in a verification channel."
+        },
+        {
+            "name": "on_member_join",
+            "description": "Sends a welcome message to the designated welcome channel when a new member joins the server."
+        },
+        {
+            "name": "on_message",
+            "description": "Handles experience and leveling mechanics for users based on their activity in the server."
         }
     ]
 }

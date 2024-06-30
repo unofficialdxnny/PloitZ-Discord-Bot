@@ -1,3 +1,4 @@
+import random
 import os
 import json
 import discord
@@ -12,6 +13,9 @@ from gtts import gTTS
 from pypresence import Presence
 import time
 
+# from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
+import itertools
+
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
 TOKEN = os.getenv("TOKEN")
@@ -24,10 +28,13 @@ intents = discord.Intents.default()
 intents.reactions = True  # Enable reaction intents
 intents.guilds = True  # Enable guild intents
 intents.messages = True  # Enable message intents
+intents.message_content = True
 intents.members = True  # Enable member intents
 intents.presences = True  # Enable presence intents
 intents.guild_messages = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+# DiscordComponents(bot)
+
 # Discord RPC
 client_id = "1250734092371099728"  # Replace with your application's client ID
 rpc = Presence(client_id)
@@ -1101,6 +1108,36 @@ async def cmd_xp(interaction: discord.Interaction):
         )
 
 
+# Command: /leaderboard
+@bot.tree.command(name="leaderboard", description="Display the top five users.")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def cmd_leaderboard(interaction: discord.Interaction):
+    user_data = load_data()
+
+    # Sort users by experience in descending order
+    sorted_users = sorted(
+        user_data.items(), key=lambda item: item[1]["experience"], reverse=True
+    )
+
+    # Create an embed
+    embed = discord.Embed(
+        title="Leaderboard",
+        description="Top 5 Users by Experience",
+        color=discord.Color.from_rgb(255, 255, 255),
+    )
+
+    # Add fields for the top 5 users
+    for index, (user_id, data) in enumerate(sorted_users[:5]):
+        user = await bot.fetch_user(int(user_id))
+        embed.add_field(
+            name=f"{index + 1}. {user.name}",
+            value=f"Level: {data['level']} | XP: {data['experience']}",
+            inline=False,
+        )
+
+    await interaction.response.send_message(embed=embed)
+
+
 # service commands
 
 
@@ -1175,7 +1212,7 @@ async def addrole(
     try:
         await user.add_roles(role)
         await interaction.response.send_message(
-            f"Added role {role.name} to {user.mention}", ephemeral=True
+            f"Added role {role.name} to {user.mention}"
         )
     except discord.Forbidden:
         await interaction.response.send_message(
@@ -1215,8 +1252,7 @@ async def slowmode(interaction: discord.Interaction, seconds: int):
     try:
         await interaction.channel.edit(slowmode_delay=seconds)
         await interaction.response.send_message(
-            f"Set slowmode to {seconds} seconds in {interaction.channel.mention}",
-            ephemeral=True,
+            f"Set slowmode to {seconds} seconds in {interaction.channel.mention}"
         )
     except discord.Forbidden:
         await interaction.response.send_message(
@@ -1228,8 +1264,138 @@ async def slowmode(interaction: discord.Interaction, seconds: int):
         )
 
 
-# Start the bot
-# Start the bot
+LINKS_ROLE_ID = 1256386441068417104
+
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    # Check if the message contains a link
+    if "http://" in message.content or "https://" in message.content:
+        # Get the roles of the user
+        user_roles = message.author.roles
+
+        # Check if the user has the "links" role
+        has_links_role = any(role.id == LINKS_ROLE_ID for role in user_roles)
+
+        if not has_links_role:
+            # If the user does not have the role, delete the message
+            await message.delete()
+            # Optionally, send a message to the user explaining why their message was deleted
+            await message.channel.send(
+                f"{message.author.mention}, you are not allowed to send links in this server.",
+                delete_after=10,
+            )
+
+    await bot.process_commands(message)
+
+
+# Command: /purge
+@bot.tree.command(
+    name="purge", description="Delete a specified number of messages from a user."
+)
+@app_commands.describe(
+    user="The user whose messages will be deleted.",
+    amount="The number of messages to delete.",
+)
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def cmd_purge(
+    interaction: discord.Interaction, user: discord.Member, amount: int
+):
+    # Check if the user has permission to manage messages
+    if not interaction.user.guild_permissions.manage_messages:
+        await interaction.response.send_message(
+            "You do not have permission to use this command.", ephemeral=True
+        )
+        return
+
+    # Ensure interaction is responded to in time
+    await interaction.response.defer(ephemeral=True)
+
+    def is_user_message(message):
+        return message.author == user
+
+    # Perform the purge operation
+    deleted = await interaction.channel.purge(limit=amount, check=is_user_message)
+
+    # Send a confirmation message after purging
+    await interaction.followup.send(
+        f"Deleted {len(deleted)} messages from {user.mention}.", ephemeral=True
+    )
+
+
+# Load prohibited words from a text file
+with open("prohibited_words.txt", "r", encoding="utf-8") as f:
+    prohibited_words = [word.strip() for word in f.readlines()]
+
+# Role ID that allows users to use prohibited words
+ALLOWED_ROLE_ID = 1256736008540520448
+
+
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return  # Ignore messages from bots
+
+    content = (
+        message.content.lower()
+    )  # Convert message to lowercase for case-insensitive check
+
+    # Check if the message contains any prohibited words
+    for word in prohibited_words:
+        if word.lower() in content:
+            # Check if the user has the allowed role
+            allowed_role = discord.utils.get(message.guild.roles, id=ALLOWED_ROLE_ID)
+            if allowed_role and allowed_role in message.author.roles:
+                return  # User has the allowed role, so allow the message
+            else:
+                # Perform action (e.g., delete message, warn user, etc.)
+                await message.delete()
+                await message.channel.send(
+                    f"{message.author.mention}, please refrain from using inappropriate language."
+                )
+                return  # Exit the function once a prohibited word is found
+
+    await bot.process_commands(message)  # Process other commands
+
+
+# Function to read filter list from file
+def read_filter_list():
+    with open("prohibited_words.txt", "r", encoding="utf-8") as f:
+        filter_list = [word.strip() for word in f.readlines() if word.strip()]
+    return filter_list
+
+
+# Function to add a word to filter list
+def add_to_filter(word):
+    with open("prohibited_words.txt", "a", encoding="utf-8") as f:
+        f.write(word + "\n")
+
+
+# Command to add a word to filter list
+@bot.tree.command(name="filter", description="Add a word to the filter list")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def filter_word(interaction: discord.Interaction, word: str):
+    # Check if user has permission to add words to filter (e.g., admin check)
+    if interaction.user.guild_permissions.administrator:
+        # Add word to filter list
+        add_to_filter(word.lower())  # Convert word to lowercase for consistency
+        await interaction.response.send_message(
+            f'Word "{word}" added to filter list.', ephemeral=True
+        )
+    else:
+        await interaction.response.send_message(
+            "You do not have permission to use this command.", ephemeral=True
+        )
+
+
+# # Function to handle interaction errors
+# @bot.event
+# async def on_slash_command_error(ctx, error):
+#     await ctx.respond(f"Error: {str(error)}", ephemeral=True)
+
 
 # Run the bot with the token
 bot.run(TOKEN)
