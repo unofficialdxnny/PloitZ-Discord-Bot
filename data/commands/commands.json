@@ -49,6 +49,14 @@
         {
             "name": "purge",
             "description": "Delete a specified number of messages from a user."
+        },
+        {
+            "name": "addrole",
+            "description": "Add a role to a user."
+        },
+        {
+            "name": "removerole",
+            "description": "Remove a role from a user."
         }
     ],
     "Admin": [
@@ -73,16 +81,16 @@
             "description": "Change a user's nickname."
         },
         {
-            "name": "addrole",
-            "description": "Add a role to a user."
-        },
-        {
             "name": "removerole",
             "description": "Remove a role from a user."
         },
         {
             "name": "slowmode",
             "description": "Set slowmode in a channel."
+        },
+        {
+            "name": "reaction_role",
+            "description": "Get a role by clicking a button"
         }
     ]
 }

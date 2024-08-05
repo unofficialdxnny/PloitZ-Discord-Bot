@@ -982,33 +982,6 @@ async def snapify(interaction: discord.Interaction):
         )
 
 
-#### TEMP
-
-
-# @bot.tree.command(name="reaction_role", description="Get a role by clicking a button")
-# @app_commands.guilds(discord.Object(id=SERVER_ID))
-# async def reaction_role(
-#     interaction: discord.Interaction, role: discord.Role, message: str
-# ):
-#     view = View()
-
-#     # Define the button and its callback properly
-#     async def button_callback(interaction: discord.Interaction):
-#         await interaction.user.add_roles(role)
-#         await interaction.response.send_message(
-#             f"You have been given the {role.mention} role!"
-#         )
-
-#     button = Button(label="Get Role", emoji="👍")
-#     button.callback = button_callback  # Assign the callback to the button
-
-#     view.add_item(button)
-
-#     await interaction.response.send_message(
-#         f"Click the button to get the {role.mention} role", view=view
-#     )
-
-
 @bot.tree.command(name="reaction_role", description="Get a role by clicking a button")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def reaction_role(
@@ -1065,23 +1038,6 @@ async def reaction_role(
     await interaction.response.send_message(
         f"{message} \nClick the button to get the {role.mention} role!", view=view
     )
-
-
-# @bot.tree.command(name="restart", description="Restart the bot")
-# @app_commands.guilds(
-#     discord.Object(id=SERVER_ID)
-# )  # Optionally restrict to a specific server
-# async def restart(interaction: discord.Interaction):
-#     if interaction.user.guild_permissions.administrator:
-#         await interaction.response.send_message("Restarting bot...", ephemeral=True)
-#         await bot.close()
-#         subprocess.Popen(
-#             ["pm2", "restart", "./PloitZ/PloitZ.py"]
-#         )  # Replace with your script name
-#     else:
-#         await interaction.response.send_message(
-#             "You do not have permission to use this command.", ephemeral=True
-#         )
 
 
 # Run the bot
