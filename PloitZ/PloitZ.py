@@ -12,20 +12,31 @@ import random
 from gtts import gTTS
 import time
 import itertools
+from dotenv import load_dotenv
 
+
+"""
+
+Seorex add the below into the .env
+
+"""
+
+os.system("cls")
+load_dotenv(dotenv_path="./data/config/.env")
 # Replace environment variables with direct values
-TOKEN = "token_goes_here"
-SERVER_ID = 1250141995243143270
-WELCOME_CHANNEL_ID = 1250141995872026693
-RULES_CHANNEL_ID = 1250141995872026691
-VERIFICATION_CHANNEL_ID = 1250522865372238026
-MEMBERS_ROLE_ID = 1250145163888824371
-UNVERIFIED_ROLE_ID = 1250530085073846334
-TICKETS_CATEGORY = 1250194498789576834
-MUTED_ROLE_ID = 1252701676712890369
-GENERAL_CHANNEL_ID = 1250141995872026689
-MEMBER_CHANNEL_ID = 1250535823049228328
-BOT_CHANNEL_ID = 1250535955396432005
+TOKEN = os.getenv("TOKEN")
+SERVER_ID = os.getenv("SERVER_ID")
+WELCOME_CHANNEL_ID = os.getenv("WELCOME_CHANNEL_ID")
+RULES_CHANNEL_ID = os.getenv("RULES_CHANNEL_ID")
+VERIFICATION_CHANNEL_ID = os.getenv("VERIFICATION_CHANNEL_ID")
+MEMBERS_ROLE_ID = os.getenv("MEMBERS_ROLE_ID")
+UNVERIFIED_ROLE_ID = os.getenv("UNVERIFIED_ROLE_ID")
+TICKETS_CATEGORY = os.getenv("TICKETS_CATEGORY")
+MUTED_ROLE_ID = os.getenv("MUTED_ROLE_ID")
+GENERAL_CHANNEL_ID = os.getenv("GENERAL_CHANNEL_ID")
+MEMBER_CHANNEL_ID = os.getenv("MEMBER_CHANNEL_ID")
+BOT_CHANNEL_ID = os.getenv("BOT_CHANNEL_ID")
+LINKS_ROLE_ID = os.getenv("LINKS_ROLE_ID")
 REACTION_EMOJI = "✅"
 
 # Initialize bot
@@ -561,6 +572,7 @@ async def muted(interaction: discord.Interaction):
         print(f"Failed to send muted users list: {e}")
 
 
+## warns users
 @bot.tree.command(name="warn", description="Warn a user with a reason.")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def warn(interaction: discord.Interaction, user: discord.Member, reason: str):
@@ -800,9 +812,6 @@ async def slowmode(interaction: discord.Interaction, seconds: int):
         await interaction.response.send_message(
             f"Failed to set slowmode. Error: {e}", ephemeral=True
         )
-
-
-LINKS_ROLE_ID = 1256386441068417104
 
 
 @bot.event
