@@ -11,6 +11,10 @@
         {
             "name": "snapify",
             "description": "Get information about Snapify app."
+        },
+        {
+            "name": "ticket",
+            "description": "Create A ticket in the server!"
         }
     ],
     "Moderation": [

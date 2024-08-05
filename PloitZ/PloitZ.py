@@ -12,14 +12,10 @@ import random
 from gtts import gTTS
 import time
 import itertools
-from dotenv import load_dotenv
+from discord.ui import View, Button
+import sys
+import subprocess
 
-
-"""
-
-Seorex add the below into the .env
-
-"""
 
 os.system("cls")
 load_dotenv(dotenv_path="./data/config/.env")
@@ -28,16 +24,16 @@ TOKEN = os.getenv("TOKEN")
 SERVER_ID = os.getenv("SERVER_ID")
 WELCOME_CHANNEL_ID = os.getenv("WELCOME_CHANNEL_ID")
 RULES_CHANNEL_ID = os.getenv("RULES_CHANNEL_ID")
-VERIFICATION_CHANNEL_ID = os.getenv("VERIFICATION_CHANNEL_ID")
+VERIFICATION_CHANNEL_ID = int(os.getenv("VERIFICATION_CHANNEL_ID"))
 MEMBERS_ROLE_ID = os.getenv("MEMBERS_ROLE_ID")
 UNVERIFIED_ROLE_ID = os.getenv("UNVERIFIED_ROLE_ID")
-TICKETS_CATEGORY = os.getenv("TICKETS_CATEGORY")
+TICKETS_CATEGORY = int(os.getenv("TICKETS_CATEGORY"))
 MUTED_ROLE_ID = os.getenv("MUTED_ROLE_ID")
 GENERAL_CHANNEL_ID = os.getenv("GENERAL_CHANNEL_ID")
 MEMBER_CHANNEL_ID = os.getenv("MEMBER_CHANNEL_ID")
 BOT_CHANNEL_ID = os.getenv("BOT_CHANNEL_ID")
-LINKS_ROLE_ID = os.getenv("LINKS_ROLE_ID")
 REACTION_EMOJI = "✅"
+
 
 # Initialize bot
 intents = discord.Intents.default()
@@ -203,7 +199,7 @@ def admin_only():
     async def predicate(interaction: discord.Interaction):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message(
-                "You do not have permission to use this command.", ephemeral=True
+                "You do not have permission to use this command."
             )
             return False
         return True
@@ -276,10 +272,10 @@ async def help_command(interaction: discord.Interaction):
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def ticket(interaction: discord.Interaction, problem: str):
     guild = interaction.guild
-    user = interaction.user  # Get the user who invoked the command
+    user = interaction.user
 
-    # Specify the category ID where the ticket channels will be created
-    category_id = TICKETS_CATEGORY
+    # Ensure TICKETS_CATEGORY is an integer
+    category_id = int(TICKETS_CATEGORY)
 
     # Fetch the category object
     category = discord.utils.get(guild.categories, id=category_id)
@@ -290,7 +286,21 @@ async def ticket(interaction: discord.Interaction, problem: str):
         )
         return
 
-    # Create channel name and permissions
+    # Check for existing ticket by checking if the channel name starts with the user's name
+    existing_ticket = None
+    for channel in category.text_channels:
+        if channel.name.startswith(f"{user.name.lower()}-"):
+            existing_ticket = channel
+            break
+
+    if existing_ticket:
+        await interaction.response.send_message(
+            f"You already have an open ticket: {existing_ticket.mention}",
+            ephemeral=True,
+        )
+        return
+
+    # Create a channel name based on the user's name and problem
     channel_name = f"{user.name.lower()}-{problem.lower().replace(' ', '-')}"
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -310,7 +320,8 @@ async def ticket(interaction: discord.Interaction, problem: str):
         return
     except discord.HTTPException:
         await interaction.response.send_message(
-            "Failed to create support ticket channel. Please try again later."
+            "Failed to create support ticket channel. Please try again later.",
+            ephemeral=True,
         )
         return
 
@@ -325,7 +336,7 @@ async def ticket(interaction: discord.Interaction, problem: str):
     try:
         await ticket_channel.send(embed=embed)
         await interaction.response.send_message(
-            f"Support ticket created in {ticket_channel.mention}.", ephemeral=True
+            f"Support ticket created in {ticket_channel.mention}."
         )
     except discord.HTTPException:
         await interaction.response.send_message(
@@ -411,9 +422,7 @@ async def avatar(interaction: discord.Interaction, user: discord.Member = None):
         await interaction.response.send_message(embed=embed)
     else:
         # If user mention is invalid, respond with an error message
-        await interaction.response.send_message(
-            "Please mention a valid user.", ephemeral=True
-        )
+        await interaction.response.send_message("Please mention a valid user.")
 
 
 # ban command
@@ -572,7 +581,6 @@ async def muted(interaction: discord.Interaction):
         print(f"Failed to send muted users list: {e}")
 
 
-## warns users
 @bot.tree.command(name="warn", description="Warn a user with a reason.")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def warn(interaction: discord.Interaction, user: discord.Member, reason: str):
@@ -602,9 +610,7 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def clear(interaction: discord.Interaction, amount: int):
     if amount <= 0:
-        await interaction.response.send_message(
-            "Please specify a positive integer.", ephemeral=True
-        )
+        await interaction.response.send_message("Please specify a positive integer.")
         return
 
     await interaction.response.defer(ephemeral=True)  # Acknowledge the interaction
@@ -615,21 +621,13 @@ async def clear(interaction: discord.Interaction, amount: int):
         # Send ephemeral message indicating successful deletion
         await interaction.followup.send(f"Deleted {len(deleted) - 1} message(s).")
     except discord.Forbidden:
-        await interaction.followup.send(
-            "I do not have permission to delete messages.", ephemeral=True
-        )
+        await interaction.followup.send("I do not have permission to delete messages.")
     except discord.HTTPException as e:
-        await interaction.followup.send(
-            f"Failed to delete messages. Error: {e}", ephemeral=True
-        )
+        await interaction.followup.send(f"Failed to delete messages. Error: {e}")
     except asyncio.TimeoutError:
-        await interaction.followup.send(
-            "Command timed out. Please try again.", ephemeral=True
-        )
+        await interaction.followup.send("Command timed out. Please try again.")
     except Exception as e:
-        await interaction.followup.send(
-            f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
-        )
+        await interaction.followup.send(f"An error occurred: {type(e).__name__} - {e}")
 
 
 # A dictionary to store the original permissions of channels before they were locked
@@ -651,11 +649,11 @@ async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
         )
     except discord.Forbidden:
         await interaction.response.send_message(
-            "I do not have permission to manage channel permissions.", ephemeral=True
+            "I do not have permission to manage channel permissions."
         )
     except Exception as e:
         await interaction.response.send_message(
-            f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
+            f"An error occurred: {type(e).__name__} - {e}"
         )
 
 
@@ -682,11 +680,11 @@ async def unlock(interaction: discord.Interaction, channel: discord.TextChannel)
         )
     except discord.Forbidden:
         await interaction.response.send_message(
-            "I do not have permission to manage channel permissions.", ephemeral=True
+            "I do not have permission to manage channel permissions."
         )
     except Exception as e:
         await interaction.response.send_message(
-            f"An error occurred: {type(e).__name__} - {e}", ephemeral=True
+            f"An error occurred: {type(e).__name__} - {e}"
         )
 
 
@@ -698,9 +696,7 @@ async def roleinfo(interaction: discord.Interaction, role: str):
     selected_role = discord.utils.get(guild.roles, name=role)
 
     if selected_role is None:
-        await interaction.response.send_message(
-            f"Role '{role}' not found.", ephemeral=True
-        )
+        await interaction.response.send_message(f"Role '{role}' not found.")
         return
 
     embed = discord.Embed(
@@ -741,15 +737,15 @@ async def nick(
     try:
         await user.edit(nick=nickname)
         await interaction.response.send_message(
-            f"Changed nickname for {user.mention} to `{nickname}`", ephemeral=True
+            f"Changed nickname for {user.mention} to `{nickname}`"
         )
     except discord.Forbidden:
         await interaction.response.send_message(
-            "I do not have permission to change that user's nickname.", ephemeral=True
+            "I do not have permission to change that user's nickname."
         )
     except discord.HTTPException as e:
         await interaction.response.send_message(
-            f"Failed to change nickname. Error: {e}", ephemeral=True
+            f"Failed to change nickname. Error: {e}"
         )
 
 
@@ -766,12 +762,10 @@ async def addrole(
         )
     except discord.Forbidden:
         await interaction.response.send_message(
-            "I do not have permission to add roles.", ephemeral=True
+            "I do not have permission to add roles."
         )
     except discord.HTTPException as e:
-        await interaction.response.send_message(
-            f"Failed to add role. Error: {e}", ephemeral=True
-        )
+        await interaction.response.send_message(f"Failed to add role. Error: {e}")
 
 
 @bot.tree.command(name="removerole", description="Remove a role from a user.")
@@ -783,16 +777,14 @@ async def removerole(
     try:
         await user.remove_roles(role)
         await interaction.response.send_message(
-            f"Removed role {role.name} from {user.mention}", ephemeral=True
+            f"Removed role {role.name} from {user.mention}"
         )
     except discord.Forbidden:
         await interaction.response.send_message(
-            "I do not have permission to remove roles.", ephemeral=True
+            "I do not have permission to remove roles."
         )
     except discord.HTTPException as e:
-        await interaction.response.send_message(
-            f"Failed to remove role. Error: {e}", ephemeral=True
-        )
+        await interaction.response.send_message(f"Failed to remove role. Error: {e}")
 
 
 @bot.tree.command(name="slowmode", description="Set slowmode in a channel.")
@@ -806,12 +798,13 @@ async def slowmode(interaction: discord.Interaction, seconds: int):
         )
     except discord.Forbidden:
         await interaction.response.send_message(
-            "I do not have permission to set slowmode in this channel.", ephemeral=True
+            "I do not have permission to set slowmode in this channel."
         )
     except discord.HTTPException as e:
-        await interaction.response.send_message(
-            f"Failed to set slowmode. Error: {e}", ephemeral=True
-        )
+        await interaction.response.send_message(f"Failed to set slowmode. Error: {e}")
+
+
+LINKS_ROLE_ID = 1256386441068417104
 
 
 @bot.event
@@ -854,7 +847,7 @@ async def cmd_purge(
     # Check if the user has permission to manage messages
     if not interaction.user.guild_permissions.manage_messages:
         await interaction.response.send_message(
-            "You do not have permission to use this command.", ephemeral=True
+            "You do not have permission to use this command."
         )
         return
 
@@ -869,7 +862,7 @@ async def cmd_purge(
 
     # Send a confirmation message after purging
     await interaction.followup.send(
-        f"Deleted {len(deleted)} messages from {user.mention}.", ephemeral=True
+        f"Deleted {len(deleted)} messages from {user.mention}."
     )
 
 
@@ -987,6 +980,108 @@ async def snapify(interaction: discord.Interaction):
         await interaction.response.send_message(
             "Failed to send a private message. They may have DMs disabled."
         )
+
+
+#### TEMP
+
+
+# @bot.tree.command(name="reaction_role", description="Get a role by clicking a button")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# async def reaction_role(
+#     interaction: discord.Interaction, role: discord.Role, message: str
+# ):
+#     view = View()
+
+#     # Define the button and its callback properly
+#     async def button_callback(interaction: discord.Interaction):
+#         await interaction.user.add_roles(role)
+#         await interaction.response.send_message(
+#             f"You have been given the {role.mention} role!"
+#         )
+
+#     button = Button(label="Get Role", emoji="👍")
+#     button.callback = button_callback  # Assign the callback to the button
+
+#     view.add_item(button)
+
+#     await interaction.response.send_message(
+#         f"Click the button to get the {role.mention} role", view=view
+#     )
+
+
+@bot.tree.command(name="reaction_role", description="Get a role by clicking a button")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def reaction_role(
+    interaction: discord.Interaction, role: discord.Role, emoji: str, message: str
+):
+    # Check if the user is an admin
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "You do not have permission to use this command. Admins only."
+        )
+        return
+    view = View()
+
+    # Check if the emoji is a custom emoji or a standard emoji
+    if emoji.startswith("<") and emoji.endswith(">"):
+        # Custom emoji
+        try:
+            # Extract the emoji name and ID
+            emoji_name = emoji.split(":")[1]
+            emoji_id = int(emoji.split(":")[2][:-1])
+            custom_emoji = discord.PartialEmoji(name=emoji_name, id=emoji_id)
+        except (IndexError, ValueError):
+            await interaction.response.send_message(
+                "Invalid custom emoji format. Please use the format <:name:id>."
+            )
+            return
+    else:
+        # Standard emoji
+        custom_emoji = emoji
+
+    async def button_callback(interaction: discord.Interaction):
+        if role not in interaction.user.roles:
+            try:
+                await interaction.user.add_roles(role)
+                await interaction.response.send_message(
+                    f"You have been given the {role.mention} role!"
+                )
+            except discord.Forbidden:
+                await interaction.response.send_message(
+                    "I do not have permission to add this role."
+                )
+            except discord.HTTPException:
+                await interaction.response.send_message(
+                    "Failed to add the role. Please try again later."
+                )
+        else:
+            await interaction.response.send_message("You already have this role.")
+
+    button = Button(label="Get Role", emoji=custom_emoji)
+    button.callback = button_callback  # Assign the callback to the button
+
+    view.add_item(button)
+
+    await interaction.response.send_message(
+        f"{message} \nClick the button to get the {role.mention} role!", view=view
+    )
+
+
+# @bot.tree.command(name="restart", description="Restart the bot")
+# @app_commands.guilds(
+#     discord.Object(id=SERVER_ID)
+# )  # Optionally restrict to a specific server
+# async def restart(interaction: discord.Interaction):
+#     if interaction.user.guild_permissions.administrator:
+#         await interaction.response.send_message("Restarting bot...", ephemeral=True)
+#         await bot.close()
+#         subprocess.Popen(
+#             ["pm2", "restart", "./PloitZ/PloitZ.py"]
+#         )  # Replace with your script name
+#     else:
+#         await interaction.response.send_message(
+#             "You do not have permission to use this command.", ephemeral=True
+#         )
 
 
 # Run the bot

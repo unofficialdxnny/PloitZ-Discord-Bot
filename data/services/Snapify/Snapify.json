@@ -1,8 +1,8 @@
 {
-    "title": "Snapify v7 update",
-    "description": "Android Edition for Snapify is here!",
-    "features": "Pre Defined commands, start, stop, adjust timers",
-    "how_to_use": "Enable USB debugging with dev mode, plug device in (if physical), start the app, /snapify  in server,  start Snapify, accept popup on device, accept popup on pc, Enjoy",
-    "image_url": "https://cdn.discordapp.com/attachments/1250538153694072952/1268766541160251454/v7.png?ex=66ad9e6b&is=66ac4ceb&hm=6be8238948bfe9293c865f7f019a4d9c01b5e033df2af5a078b64085e575bc2c&",
-    "private_message": "Thank you for your interest in Snapify! Check the server for more details. Here is your Snapify release... https://github.com/unofficialdxnny/Snapify"
+    "title": "Snapify v7.1.2",
+    "description": "CLI powered tool to enhance the usage and create an optimal flow in sending snaps",
+    "features": "auto detect ui, auto click ui elements (pre configured) custom wait times",
+    "how_to_use": "Enable USB debugging with dev mode, plug device in (if physical), start the app, /snapify in server, start Snapify, accept popup on device, accept popup on pc, Enjoy",
+    "image_url": "https://cdn.discordapp.com/attachments/1250538153694072952/1268766541160251454/v7.png?ex=66b23bab&is=66b0ea2b&hm=40ba5ab4871ad866dd0d8f155b4a1084d0ad7d546e892aae5e196d08d18be7c9&",
+    "private_message": "Thank you for your interest in Snapify! Check the server for more details. Here is your Snapify release... [https://github.com/unofficialdxnny/Snapify](https://github.com/unofficialdxnny/Snapify/releases/tag/v7.1.2)"
 }
