@@ -1,0 +1,84 @@
+{
+    "General": [
+        {
+            "name": "help",
+            "description": "Show all available commands."
+        },
+        {
+            "name": "avatar",
+            "description": "Get the avatar of a user."
+        },
+        {
+            "name": "snapify",
+            "description": "Get information about Snapify app."
+        }
+    ],
+    "Moderation": [
+        {
+            "name": "mute",
+            "description": "Mute a user indefinitely."
+        },
+        {
+            "name": "unmute",
+            "description": "Unmute a user."
+        },
+        {
+            "name": "muted",
+            "description": "List all currently muted users."
+        },
+        {
+            "name": "warn",
+            "description": "Warn a user with a reason."
+        },
+        {
+            "name": "clear",
+            "description": "Clear a specified number of messages."
+        },
+        {
+            "name": "lock",
+            "description": "Lock a channel."
+        },
+        {
+            "name": "unlock",
+            "description": "Unlock a channel."
+        },
+        {
+            "name": "purge",
+            "description": "Delete a specified number of messages from a user."
+        }
+    ],
+    "Admin": [
+        {
+            "name": "ban",
+            "description": "Bans a user from the server."
+        },
+        {
+            "name": "kick",
+            "description": "Kicks a user from the server."
+        },
+        {
+            "name": "roleinfo",
+            "description": "Get information about a role."
+        },
+        {
+            "name": "snapify_update",
+            "description": "Update Snapify information."
+        },
+        {
+            "name": "nick",
+            "description": "Change a user's nickname."
+        },
+        {
+            "name": "addrole",
+            "description": "Add a role to a user."
+        },
+        {
+            "name": "removerole",
+            "description": "Remove a role from a user."
+        },
+        {
+            "name": "slowmode",
+            "description": "Set slowmode in a channel."
+        }
+    ]
+}

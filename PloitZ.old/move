@@ -1,0 +1,68 @@
+import discord
+from discord.ext import commands
+import asyncio
+
+intents = discord.Intents.default()
+intents.members = True
+
+# Replace these values with your own
+TOKEN = ""
+TARGET_GUILD_ID = 1250141995243143270  # The ID of the target server
+
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+
+@bot.event
+async def on_ready():
+    print(f"Bot connected as {bot.user}")
+
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def massmove(ctx):
+    """Generates an invite link to the target server and sends it to all members."""
+    target_guild = bot.get_guild(TARGET_GUILD_ID)
+    if target_guild is None:
+        await ctx.send("The target server was not found.")
+        return
+
+    # Create an invite link
+    invite_link = None
+    for channel in target_guild.text_channels:
+        try:
+            invite = await channel.create_invite(
+                max_uses=0, unique=True
+            )  # Set max_uses=0 for unlimited uses
+            invite_link = invite.url
+            break
+        except discord.Forbidden:
+            continue
+        except discord.HTTPException:
+            await ctx.send("Failed to create an invite link.")
+            return
+
+    if not invite_link:
+        await ctx.send("No suitable channel found to create an invite link.")
+        return
+
+    # Send the invite link to all members of the current guild
+    for member in ctx.guild.members:
+        if member.bot:
+            continue
+        try:
+            await member.send(
+                f"Here is your invite to the new server: {invite_link} \n please join to experience new stuff, personalised bots, and new and better scripts"
+            )
+            await ctx.send(
+                f"Invite sent to {member.name}. Waiting 30 seconds before sending the next one."
+            )
+            await asyncio.sleep(30)
+        except discord.Forbidden:
+            continue
+        except discord.HTTPException:
+            continue
+
+    await ctx.send(f"Invite sent to all members.")
+
+
+bot.run(TOKEN)

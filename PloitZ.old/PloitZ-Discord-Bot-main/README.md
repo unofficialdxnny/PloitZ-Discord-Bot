@@ -20,23 +20,41 @@ PloitZ is a versatile and powerful Discord bot designed to enhance the experienc
 - **/ping**: Checks the bot's latency.
 - **/user [@user]**: Displays information about a specific user. 
 - **/serverinfo**: Displays information about the server.
-- **/roleinfo [@role]**: Provides information about a specific role. 
-- **/poll [question] [option1] [option2] ...**: Creates a poll for users to vote on.
-  
+- **/roleinfo [@role]**: Provides information about a specific role. (coming soon)
+- **/poll [question] [option1] [option2] ...**: Creates a poll for users to vote on. (coming soon)
+
 ### Fun and Engagement Commands
-- **/meme**: Fetches a random meme. 
-- **/joke**: Tells a random joke. 
-- **/quote**: Sends a random inspirational quote. 
-- **/8ball [question]**: Magic 8-ball command for fun predictions. 
-- **/roll [number]**: Rolls a random number between 1 and the specified number.
+- **/meme**: Fetches a random meme. (coming soon)
+- **/joke**: Tells a random joke. (coming soon)
+- **/quote**: Sends a random inspirational quote. (coming soon)
+- **/8ball [question]**: Magic 8-ball command for fun predictions. (coming soon)
+- **/roll [number]**: Rolls a random number between 1 and the specified number. (coming soon)
+
+### Optional Commands
+
+#### Customization and Roles
+- **/autorole [@role]**: Automatically assigns a role to new members. (coming soon)
+- **/selfrole [@role]**: Allows users to assign a role to themselves. (coming soon)
+- **/removerole [@role]**: Allows users to remove a self-assigned role. (coming soon)
+
+#### Music Commands
+- **/play [song name or URL]**: Plays a song in a voice channel. (coming soon)
+- **/skip**: Skips the currently playing song. (coming soon)
+- **/queue**: Displays the current music queue. (coming soon)
+- **/stop**: Stops the music and clears the queue. (coming soon)
 
 #### Leveling and Economy (coming soon)
-- **/rank**: Displays the user’s rank and experience points.
-- **/leaderboard**: Shows the top-ranked users in the server. 
-- **/xp**: Displays users XP.
+- **/rank**: Displays the user’s rank and experience points. (coming soon)
+- **/leaderboard**: Shows the top-ranked users in the server. (coming soon)
+- **/daily**: Allows users to claim a daily reward. (coming soon)
+- **/balance**: Shows the user's balance in the server’s currency. (coming soon)
+- **/shop**: Displays items available for purchase with the server’s currency. (coming soon)
+- **/buy [item]**: Allows users to purchase items from the shop. (coming soon)
 
 #### Event and Reminder Commands
-- **/event [details]**: Creates a server event with specific details. 
+- **/event [details]**: Creates a server event with specific details. (coming soon)
+- **/remindme [time] [message]**: Sets a personal reminder for the user. (coming soon)
+- **/reminder [time] [message]**: Sets a server-wide reminder for an event or announcement. (coming soon)
 
 #### Administration Commands
 - **/setprefix [new prefix]**: Changes the bot’s command prefix. (coming soon)
