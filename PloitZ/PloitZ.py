@@ -162,16 +162,16 @@ async def on_member_join(member):
 
         # Create an embed for the welcome message
         embed = discord.Embed(
-            title=f"Welcome to {member.guild.name}, {member.name}!",
-            description=f"We are glad you joined us. Please read the rules in <#{RULES_CHANNEL_ID}> and enjoy your stay!",
+            title="Welcome to the server!",
+            description=f"Welcome to {member.guild.name}, {member.mention}!\n\nWe are glad you joined us. Please read the rules in <#{RULES_CHANNEL_ID}> and enjoy your stay!",
             color=discord.Color.from_rgb(254, 254, 254),
         )
-        embed.set_thumbnail(url=avatar_url)  # Set member's avatar as thumbnail
+        embed.set_thumbnail(url=avatar_url)
         embed.set_footer(
             text=f"Joined {member.guild.name} | {member.guild.member_count} members"
         )
 
-        # Send the welcome message to the welcome channel
+        # Send the embed to the welcome channel
         try:
             await welcome_channel.send(embed=embed)
         except discord.HTTPException as e:
@@ -191,8 +191,8 @@ async def on_member_remove(member):
 
         # Create an embed for the leave message
         embed = discord.Embed(
-            title=f"Goodbye, {member.name}!",
-            description=f"{member.name} has left the server. We'll miss you!",
+            title=f"Goodbye, @{member.name}!",
+            description=f"{member.name} has left the server. We wont miss you!",
             color=discord.Color.red(),  # Change color to red to indicate departure
         )
         embed.set_thumbnail(url=avatar_url)  # Set member's avatar as thumbnail
