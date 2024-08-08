@@ -1091,6 +1091,27 @@ async def restart(interaction: discord.Interaction):
     os.system(f"python {current_file}")
     os._exit(1)
 
+
+
+
+@bot.tree.command(name="create_role", description="creates a role easily")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def create_role(interaction: discord.Interaction, name: str):
+	guild = interaction.guild
+	await guild.create_role(name=name)
+    await interaction.response.send_message("Restarting...")
+    await ctx.send(f'Role `{name}` has been created')
+
+
+
+
+
+
+
+
+
+
 # Run the bot
 if __name__ == "__main__":
     try:
