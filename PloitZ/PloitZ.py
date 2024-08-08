@@ -36,6 +36,7 @@ import subprocess
 load_dotenv(dotenv_path="./data/config/.env")
 
 TOKEN = f"{os.getenv("TOKEN")}"
+
 SERVER_ID = 1250141995243143270
 WELCOME_CHANNEL_ID = 1250141995872026693
 RULES_CHANNEL_ID = 1250141995872026691
@@ -107,7 +108,7 @@ async def on_ready():
         await bot.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.playing,
-                name=f"/help | {member_count} members"
+                name=f"/help | {member_count} Members"
             )
         )
 
@@ -253,7 +254,9 @@ COMMANDS_DATA = {
         {"name": "nick", "description": "Change a user's nickname."},
         {"name": "removerole", "description": "Remove a role from a user."},
         {"name": "slowmode", "description": "Set slowmode in a channel."},
-        {"name": "reaction_role", "description": "Get a role by clicking a button"}
+        {"name": "reaction_role", "description": "Get a role by clicking a button"},
+        {"name": "create_role", "description": "Creates a role easily"},
+        {"name": "delete_role", "description": "Deletes a role easily"},
     ]
 }
 
@@ -1092,22 +1095,36 @@ async def restart(interaction: discord.Interaction):
 
 
 
-# @bot.tree.command(name="create_role", description="creates a role easily")
-# @app_commands.guilds(discord.Object(id=SERVER_ID))
-# @admin_only()
-# async def create_role(interaction: discord.Interaction, name: str):
-# 	guild = interaction.guild
-# 	await guild.create_role(name=name)
-#     await interaction.response.send_message("Restarting...")
-#     await ctx.send(f'Role `{name}` has been created')
+@bot.tree.command(name="create_role", description="Creates a role easily")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def create_role(interaction: discord.Interaction, name: str):
+    guild = interaction.guild
+    await guild.create_role(name=name)
+    await interaction.response.send_message(f'Role `{name}` has been created')
 
 
+@bot.tree.command(name="delete_role", description="Deletes a role easily")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
+async def delete_role(interaction: discord.Interaction, role: str):
+    guild = interaction.guild
+    selected_role = discord.utils.get(guild.roles, name=role)
+    if selected_role:
+        await selected_role.delete()
+        await interaction.response.send_message(f'Role `{role}` has been deleted')
+    else:
+        await interaction.response.send_message(f'Role `{role}` not found')
 
 
-
-
-
-
+@delete_role.autocomplete("role")
+async def role_autocomplete(interaction: discord.Interaction, current: str):
+    roles = interaction.guild.roles
+    return [
+        app_commands.Choice(name=role.name, value=role.name)
+        for role in roles
+        if current.lower() in role.name.lower()
+    ]
 
 
 # Run the bot
