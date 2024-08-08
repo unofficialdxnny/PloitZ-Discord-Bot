@@ -33,7 +33,9 @@ import subprocess
 # MEMBER_CHANNEL_ID = int(os.getenv("MEMBER_CHANNEL_ID"))
 # BOT_CHANNEL_ID = int(os.getenv("BOT_CHANNEL_ID"))
 
-TOKEN = ""
+load_dotenv(dotenv_path="./data/config/.env")
+
+TOKEN = f"{os.getenv("TOKEN")}"
 SERVER_ID = 1250141995243143270
 WELCOME_CHANNEL_ID = 1250141995872026693
 RULES_CHANNEL_ID = 1250141995872026691
@@ -1056,6 +1058,22 @@ async def reaction_role(
     await interaction.response.send_message(
         f"{message} \nClick the button to get the {role.mention} role!", view=view
     )
+
+
+current_directory = os.getcwd()
+
+
+script_path = os.path.join(current_directory, "PloitZ", "bot.py")
+
+
+@bot.tree.command(name="restart", description="Restarts the bot (Owner only).")
+@app_commands.guilds(discord.Object(id=SERVER_ID))
+async def restart(interaction: discord.Interaction):
+    os.system("cls")
+    time.sleep(2)
+    os.system(script_path)
+    time.sleep(2)
+    sys.exit()
 
 
 # Run the bot
