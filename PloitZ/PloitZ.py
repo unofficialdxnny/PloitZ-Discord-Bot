@@ -35,7 +35,7 @@ import subprocess
 
 load_dotenv(dotenv_path="./data/config/.env")
 
-TOKEN = f"{os.getenv("TOKEN")}"
+# TOKEN = f"{os.getenv("TOKEN")}"
 
 SERVER_ID = 1250141995243143270
 WELCOME_CHANNEL_ID = 1250141995872026693
