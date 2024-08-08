@@ -66,6 +66,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"We have logged in as {bot.user}")
+
     try:
         # Sync global commands
         synced_global = await bot.tree.sync()
@@ -79,9 +80,9 @@ async def on_ready():
         # Check if there is an existing verification message
         verification_message = None
         async for message in verification_channel.history():
-            if message.author == bot.user and REACTION_EMOJI in [
-                reaction.emoji for reaction in message.reactions
-            ]:
+            if message.author == bot.user and any(
+                reaction.emoji == REACTION_EMOJI for reaction in message.reactions
+            ):
                 verification_message = message
                 break
 
@@ -101,13 +102,12 @@ async def on_ready():
             except discord.HTTPException as e:
                 print(f"Failed to create verification message: {e}")
 
-        servers = len(bot.guilds)
-        members = sum(guild.member_count - 1 for guild in bot.guilds)
-
+        # Update bot presence with dynamic member count
+        member_count = sum(guild.member_count for guild in bot.guilds)
         await bot.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.playing,
-                name=f"/help",
+                name=f"/help | {member_count} members"
             )
         )
 
@@ -118,9 +118,7 @@ async def on_ready():
         # Sync guild-specific commands
         test_guild = discord.Object(id=SERVER_ID)
         synced_guild = await bot.tree.sync(guild=test_guild)
-        print(
-            f"Successfully synced {len(synced_guild)} guild command(s) in {SERVER_ID}"
-        )
+        print(f"Successfully synced {len(synced_guild)} guild command(s) in {SERVER_ID}")
     except Exception as e:
         print(f"Error syncing guild commands: {e}")
 
@@ -1094,14 +1092,14 @@ async def restart(interaction: discord.Interaction):
 
 
 
-@bot.tree.command(name="create_role", description="creates a role easily")
-@app_commands.guilds(discord.Object(id=SERVER_ID))
-@admin_only()
-async def create_role(interaction: discord.Interaction, name: str):
-	guild = interaction.guild
-	await guild.create_role(name=name)
-    await interaction.response.send_message("Restarting...")
-    await ctx.send(f'Role `{name}` has been created')
+# @bot.tree.command(name="create_role", description="creates a role easily")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# @admin_only()
+# async def create_role(interaction: discord.Interaction, name: str):
+# 	guild = interaction.guild
+# 	await guild.create_role(name=name)
+#     await interaction.response.send_message("Restarting...")
+#     await ctx.send(f'Role `{name}` has been created')
 
 
 
