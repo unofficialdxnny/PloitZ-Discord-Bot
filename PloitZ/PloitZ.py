@@ -1083,7 +1083,7 @@ current_directory = os.getcwd()
 current_file = os.path.join(current_directory, "PloitZ", "bot.py")
 
 
-@bot.tree.command(name="restart", description="Restart the bot.")
+@bot.tree.command(name="reload", description="Restart the bot.")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 @admin_only()
 async def restart(interaction: discord.Interaction):
