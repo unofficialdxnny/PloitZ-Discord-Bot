@@ -1060,15 +1060,43 @@ async def reaction_role(
     )
 
 
+# current_directory = os.getcwd()
+
+
+# script_path = os.path.join(current_directory, "PloitZ", "bot.py")
+
+
+# @bot.tree.command(name="restart", description="Restarts the bot (Owner only).")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# async def restart(interaction: discord.Interaction):
+#     os.system("cls")
+#     time.sleep(2)
+#     os.system(script_path)
+#     time.sleep(2)
+#     sys.exit()
+
+
+RESTART_ALLOWED_ROLES = {
+    1250144108656197824,
+    1250145535738904679,
+    1250144981939654837,
+}
+
 current_directory = os.getcwd()
-
-
 script_path = os.path.join(current_directory, "PloitZ", "bot.py")
-
 
 @bot.tree.command(name="restart", description="Restarts the bot (Owner only).")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def restart(interaction: discord.Interaction):
+    # Check if the user has one of the allowed roles
+    has_role = any(role.id in RESTART_ALLOWED_ROLES for role in interaction.user.roles)
+    if not has_role:
+        await interaction.response.send_message("You do not have permission to use this command.")
+        return
+
+    # Inform the user that the bot is restarting
+    await interaction.response.send_message("Restarting bot...")
+    
     os.system("cls")
     time.sleep(2)
     os.system(script_path)
