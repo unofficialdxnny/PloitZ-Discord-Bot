@@ -226,29 +226,43 @@ def admin_only():
 # Assuming the bot is already initialized elsewhere
 # bot = commands.Bot(command_prefix="!")
 
-COMMANDS_FILE = os.path.join("./data/commands", "commands.json")
-
-
-def read_commands():
-    try:
-        with open(COMMANDS_FILE, "r") as f:
-            commands_data = json.load(f)
-        print(f"Loaded commands: {commands_data}")
-        return commands_data
-    except FileNotFoundError:
-        print(f"FileNotFoundError: '{COMMANDS_FILE}' not found.")
-        return {}
-    except json.JSONDecodeError:
-        print(
-            f"JSONDecodeError: Unable to parse '{COMMANDS_FILE}'. Check if the file contains valid JSON data."
-        )
-        return {}
-
+# Commands data embedded directly in the Python file
+COMMANDS_DATA = {
+    "General": [
+        {"name": "help", "description": "Show all available commands."},
+        {"name": "avatar", "description": "Get the avatar of a user."},
+        {"name": "snapify", "description": "Get information about Snapify app."},
+        {"name": "ticket", "description": "Create A ticket in the server!"}
+    ],
+    "Moderation": [
+        {"name": "mute", "description": "Mute a user indefinitely."},
+        {"name": "unmute", "description": "Unmute a user."},
+        {"name": "muted", "description": "List all currently muted users."},
+        {"name": "warn", "description": "Warn a user with a reason."},
+        {"name": "clear", "description": "Clear a specified number of messages."},
+        {"name": "lock", "description": "Lock a channel."},
+        {"name": "unlock", "description": "Unlock a channel."},
+        {"name": "purge", "description": "Delete a specified number of messages from a user."},
+        {"name": "addrole", "description": "Add a role to a user."},
+        {"name": "removerole", "description": "Remove a role from a user."}
+    ],
+    "Admin": [
+        {"name": "Restart", "description": "Restarts the bot"},
+        {"name": "ban", "description": "Bans a user from the server."},
+        {"name": "kick", "description": "Kicks a user from the server."},
+        {"name": "roleinfo", "description": "Get information about a role."},
+        {"name": "snapify_update", "description": "Update Snapify information."},
+        {"name": "nick", "description": "Change a user's nickname."},
+        {"name": "removerole", "description": "Remove a role from a user."},
+        {"name": "slowmode", "description": "Set slowmode in a channel."},
+        {"name": "reaction_role", "description": "Get a role by clicking a button"}
+    ]
+}
 
 @bot.tree.command(name="help", description="Show all available commands.")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def help_command(interaction: discord.Interaction):
-    commands_data = read_commands()
+    commands_data = COMMANDS_DATA
 
     # Check if the user has admin privileges
     is_admin = interaction.user.guild_permissions.administrator
@@ -274,171 +288,176 @@ async def help_command(interaction: discord.Interaction):
     try:
         # Simulate typing effect
         async with interaction.channel.typing():
-            # Send the message in chunks
-            total_length = len(embed.description)
-            chunk_size = 2000  # Max length of a message
-            for i in range(0, total_length, chunk_size):
+            # Check if the embed is too large
+            if len(embed.to_dict().get('description', '')) > 2000:
+                # Send in chunks if description is too long
+                embed.description = embed.description[:2000]
                 await interaction.response.send_message(embed=embed)
-                await asyncio.sleep(1)  # Add delay between chunks
+                # Adjust if necessary based on your needs
+            else:
+                await interaction.response.send_message(embed=embed)
+                
     except discord.HTTPException as e:
         print(f"Failed to send help embed: {e}")
+        await interaction.response.send_message("An error occurred while sending the help message.")
+
+'''
+SHUTDOWN tickets service as it is old (Discord Forums is a neater way and more organised)
+'''
+
+# @bot.tree.command(name="ticket", description="Create a support ticket.")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# async def ticket(interaction: discord.Interaction, problem: str):
+#     guild = interaction.guild
+#     user = interaction.user
+
+#     # Ensure TICKETS_CATEGORY is an integer
+#     category_id = int(TICKETS_CATEGORY)
+
+#     # Fetch the category object
+#     category = discord.utils.get(guild.categories, id=category_id)
+
+#     if category is None:
+#         await interaction.response.send_message(
+#             "Category not found. Please configure the bot correctly."
+#         )
+#         return
+
+#     # Check for existing ticket by checking if the channel name starts with the user's name
+#     existing_ticket = None
+#     for channel in category.text_channels:
+#         if channel.name.startswith(f"{user.name.lower()}-"):
+#             existing_ticket = channel
+#             break
+
+#     if existing_ticket:
+#         await interaction.response.send_message(
+#             f"You already have an open ticket: {existing_ticket.mention}",
+#             ephemeral=True,
+#         )
+#         return
+
+#     # Create a channel name based on the user's name and problem
+#     channel_name = f"{user.name.lower()}-{problem.lower().replace(' ', '-')}"
+#     overwrites = {
+#         guild.default_role: discord.PermissionOverwrite(read_messages=False),
+#         guild.me: discord.PermissionOverwrite(read_messages=True),
+#         user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+#     }
+
+#     try:
+#         # Create the support ticket channel under the specified category
+#         ticket_channel = await guild.create_text_channel(
+#             channel_name, category=category, overwrites=overwrites
+#         )
+#     except discord.Forbidden:
+#         await interaction.response.send_message(
+#             "I don't have permission to create channels."
+#         )
+#         return
+#     except discord.HTTPException:
+#         await interaction.response.send_message(
+#             "Failed to create support ticket channel. Please try again later.",
+#             ephemeral=True,
+#         )
+#         return
+
+#     # Create an embed with the user's problem
+#     embed = discord.Embed(
+#         title="Support Ticket",
+#         description=f"**User:** {user.mention}\n**Problem:** {problem}",
+#         color=discord.Color.from_rgb(254, 254, 254),
+#     )
+
+#     # Send the embed to the support ticket channel
+#     try:
+#         await ticket_channel.send(embed=embed)
+#         await interaction.response.send_message(
+#             f"Support ticket created in {ticket_channel.mention}."
+#         )
+#     except discord.HTTPException:
+#         await interaction.response.send_message(
+#             "Failed to send embed message to support ticket channel."
+#         )
 
 
-@bot.tree.command(name="ticket", description="Create a support ticket.")
-@app_commands.guilds(discord.Object(id=SERVER_ID))
-async def ticket(interaction: discord.Interaction, problem: str):
-    guild = interaction.guild
-    user = interaction.user
+# @bot.tree.command(name="close", description="Close a support ticket.")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# async def close(interaction: discord.Interaction):
+#     guild = interaction.guild
+#     author = interaction.user
 
-    # Ensure TICKETS_CATEGORY is an integer
-    category_id = int(TICKETS_CATEGORY)
+#     # Check if the command is used in a ticket channel
+#     if interaction.channel.category_id != TICKETS_CATEGORY:
+#         await interaction.response.send_message(
+#             "/close may only be used in a ticket channel."
+#         )
+#         return
 
-    # Fetch the category object
-    category = discord.utils.get(guild.categories, id=category_id)
+#     # Check if the author is an admin
+#     if not author.guild_permissions.administrator:
+#         await interaction.response.send_message(
+#             "You must be an admin to use this command."
+#         )
+#         return
 
-    if category is None:
-        await interaction.response.send_message(
-            "Category not found. Please configure the bot correctly."
-        )
-        return
+#     # Fetch the category object for tickets
+#     category = discord.utils.get(guild.categories, id=TICKETS_CATEGORY)
 
-    # Check for existing ticket by checking if the channel name starts with the user's name
-    existing_ticket = None
-    for channel in category.text_channels:
-        if channel.name.startswith(f"{user.name.lower()}-"):
-            existing_ticket = channel
-            break
+#     if category is None:
+#         await interaction.response.send_message(
+#             "Tickets category not found. Please configure the bot correctly."
+#         )
+#         return
 
-    if existing_ticket:
-        await interaction.response.send_message(
-            f"You already have an open ticket: {existing_ticket.mention}",
-            ephemeral=True,
-        )
-        return
+#     # Get list of ticket channels under the category
+#     ticket_channels = [
+#         channel
+#         for channel in category.channels
+#         if isinstance(channel, discord.TextChannel)
+#     ]
 
-    # Create a channel name based on the user's name and problem
-    channel_name = f"{user.name.lower()}-{problem.lower().replace(' ', '-')}"
-    overwrites = {
-        guild.default_role: discord.PermissionOverwrite(read_messages=False),
-        guild.me: discord.PermissionOverwrite(read_messages=True),
-        user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-    }
+#     if not ticket_channels:
+#         await interaction.response.send_message(
+#             "No ticket channels found in the tickets category."
+#         )
+#         return
 
-    try:
-        # Create the support ticket channel under the specified category
-        ticket_channel = await guild.create_text_channel(
-            channel_name, category=category, overwrites=overwrites
-        )
-    except discord.Forbidden:
-        await interaction.response.send_message(
-            "I don't have permission to create channels."
-        )
-        return
-    except discord.HTTPException:
-        await interaction.response.send_message(
-            "Failed to create support ticket channel. Please try again later.",
-            ephemeral=True,
-        )
-        return
-
-    # Create an embed with the user's problem
-    embed = discord.Embed(
-        title="Support Ticket",
-        description=f"**User:** {user.mention}\n**Problem:** {problem}",
-        color=discord.Color.from_rgb(254, 254, 254),
-    )
-
-    # Send the embed to the support ticket channel
-    try:
-        await ticket_channel.send(embed=embed)
-        await interaction.response.send_message(
-            f"Support ticket created in {ticket_channel.mention}."
-        )
-    except discord.HTTPException:
-        await interaction.response.send_message(
-            "Failed to send embed message to support ticket channel."
-        )
-
-
-@bot.tree.command(name="close", description="Close a support ticket.")
-@app_commands.guilds(discord.Object(id=SERVER_ID))
-async def close(interaction: discord.Interaction):
-    guild = interaction.guild
-    author = interaction.user
-
-    # Check if the command is used in a ticket channel
-    if interaction.channel.category_id != TICKETS_CATEGORY:
-        await interaction.response.send_message(
-            "/close may only be used in a ticket channel."
-        )
-        return
-
-    # Check if the author is an admin
-    if not author.guild_permissions.administrator:
-        await interaction.response.send_message(
-            "You must be an admin to use this command."
-        )
-        return
-
-    # Fetch the category object for tickets
-    category = discord.utils.get(guild.categories, id=TICKETS_CATEGORY)
-
-    if category is None:
-        await interaction.response.send_message(
-            "Tickets category not found. Please configure the bot correctly."
-        )
-        return
-
-    # Get list of ticket channels under the category
-    ticket_channels = [
-        channel
-        for channel in category.channels
-        if isinstance(channel, discord.TextChannel)
-    ]
-
-    if not ticket_channels:
-        await interaction.response.send_message(
-            "No ticket channels found in the tickets category."
-        )
-        return
-
-    # Attempt to delete the current channel
-    try:
-        await interaction.channel.delete()
-        await interaction.response.send_message(
-            f"Successfully closed {interaction.channel.name}."
-        )
-    except discord.Forbidden:
-        await interaction.response.send_message(
-            "I do not have permission to delete this channel."
-        )
-    except discord.HTTPException:
-        await interaction.response.send_message(
-            "Failed to delete the channel. Please try again later."
-        )
+#     # Attempt to delete the current channel
+#     try:
+#         await interaction.channel.delete()
+#         await interaction.response.send_message(
+#             f"Successfully closed {interaction.channel.name}."
+#         )
+#     except discord.Forbidden:
+#         await interaction.response.send_message(
+#             "I do not have permission to delete this channel."
+#         )
+#     except discord.HTTPException:
+#         await interaction.response.send_message(
+#             "Failed to delete the channel. Please try again later."
+#         )
 
 
 # Slash command to get user avatar
 @bot.tree.command(name="avatar", description="Get the avatar of a user.")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def avatar(interaction: discord.Interaction, user: discord.Member = None):
-    # Ensure the user mentioned is a valid Discord user
-    if user is not None:
-        # Fetch avatar URL
-        avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
+    # Use the interaction user if no user is mentioned
+    user = user or interaction.user
+    
+    # Fetch avatar URL
+    avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
 
-        # Create an embed with the avatar image
-        embed = discord.Embed(
-            title=f"Avatar of {user.name}#{user.discriminator}",
-            color=discord.Color.from_rgb(254, 254, 254),
-        )
-        embed.set_image(url=avatar_url)
+    # Create an embed with the avatar image
+    embed = discord.Embed(
+        title=f"Avatar of {user.name}",
+        color=discord.Color.from_rgb(254, 254, 254),
+    )
+    embed.set_image(url=avatar_url)
 
-        # Send the embed as a response to the interaction
-        await interaction.response.send_message(embed=embed)
-    else:
-        # If user mention is invalid, respond with an error message
-        await interaction.response.send_message("Please mention a valid user.")
+    # Send the embed as a response to the interaction
+    await interaction.response.send_message(embed=embed)
 
 
 # ban command
@@ -603,7 +622,7 @@ async def warn(interaction: discord.Interaction, user: discord.Member, reason: s
     # Send warning message in server channel
     try:
         await interaction.response.send_message(
-            f"{user.mention}, you have been warned for: {reason}"
+            f"{user.mention}, you have been warned: {reason}"
         )
     except discord.HTTPException as e:
         print(f"Failed to send warning message in server channel: {e}")
@@ -1060,49 +1079,17 @@ async def reaction_role(
     )
 
 
-# current_directory = os.getcwd()
-
-
-# script_path = os.path.join(current_directory, "PloitZ", "bot.py")
-
-
-# @bot.tree.command(name="restart", description="Restarts the bot (Owner only).")
-# @app_commands.guilds(discord.Object(id=SERVER_ID))
-# async def restart(interaction: discord.Interaction):
-#     os.system("cls")
-#     time.sleep(2)
-#     os.system(script_path)
-#     time.sleep(2)
-#     sys.exit()
-
-
-RESTART_ALLOWED_ROLES = {
-    1250144108656197824,
-    1250145535738904679,
-    1250144981939654837,
-}
-
 current_directory = os.getcwd()
-script_path = os.path.join(current_directory, "PloitZ", "bot.py")
+current_file = os.path.join(current_directory, "PloitZ", "bot.py")
 
-@bot.tree.command(name="restart", description="Restarts the bot (Owner only).")
+
+@bot.tree.command(name="restart", description="Restart the bot.")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
+@admin_only()
 async def restart(interaction: discord.Interaction):
-    # Check if the user has one of the allowed roles
-    has_role = any(role.id in RESTART_ALLOWED_ROLES for role in interaction.user.roles)
-    if not has_role:
-        await interaction.response.send_message("You do not have permission to use this command.")
-        return
-
-    # Inform the user that the bot is restarting
-    await interaction.response.send_message("Restarting bot...")
-    
-    os.system("cls")
-    time.sleep(2)
-    os.system(script_path)
-    time.sleep(2)
-    sys.exit()
-
+    await interaction.response.send_message("Restarting...")
+    os.system(f"python {current_file}")
+    os._exit(1)
 
 # Run the bot
 if __name__ == "__main__":
