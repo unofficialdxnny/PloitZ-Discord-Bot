@@ -162,16 +162,16 @@ async def on_member_join(member):
 
         # Create an embed for the welcome message
         embed = discord.Embed(
-            title="Welcome to the server!",
-            description=f"Welcome to {member.guild.name}, {member.mention}!\n\nWe are glad you joined us. Please read the rules in <#{RULES_CHANNEL_ID}> and enjoy your stay!",
+            title=f"Welcome to {member.guild.name}, @{member.name}!",
+            description=f"We are glad you joined us. Please read the rules in <#{RULES_CHANNEL_ID}> and enjoy your stay!",
             color=discord.Color.from_rgb(254, 254, 254),
         )
-        embed.set_thumbnail(url=avatar_url)
+        embed.set_thumbnail(url=avatar_url)  # Set member's avatar as thumbnail
         embed.set_footer(
             text=f"Joined {member.guild.name} | {member.guild.member_count} members"
         )
 
-        # Send the embed to the welcome channel
+        # Send the welcome message to the welcome channel
         try:
             await welcome_channel.send(embed=embed)
         except discord.HTTPException as e:
@@ -191,7 +191,7 @@ async def on_member_remove(member):
 
         # Create an embed for the leave message
         embed = discord.Embed(
-            title=f"Goodbye, @{member.name}!",
+            title=f"Goodbye, {member.name}!",
             description=f"{member.name} has left the server. We wont miss you!",
             color=discord.Color.red(),  # Change color to red to indicate departure
         )
@@ -644,62 +644,66 @@ async def clear(interaction: discord.Interaction, amount: int):
         await interaction.followup.send(f"An error occurred: {type(e).__name__} - {e}")
 
 
+"""
+removed these commands as get rate limited from discord
+
+"""
 # A dictionary to store the original permissions of channels before they were locked
 original_permissions = {}
 
 
-@bot.tree.command(name="lock", description="Lock a channel.")
-@app_commands.guilds(discord.Object(id=SERVER_ID))
-async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
-    guild = interaction.guild
+# @bot.tree.command(name="lock", description="Lock a channel.")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# async def lock(interaction: discord.Interaction, channel: discord.TextChannel):
+#     guild = interaction.guild
 
-    # Store the original permissions of the channel
-    original_permissions[channel.id] = channel.overwrites_for(guild.default_role)
+#     # Store the original permissions of the channel
+#     original_permissions[channel.id] = channel.overwrites_for(guild.default_role)
 
-    try:
-        await channel.set_permissions(guild.default_role, send_messages=False)
-        await interaction.response.send_message(
-            f"🔒 Channel {channel.mention} has been locked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
-        )
-    except discord.Forbidden:
-        await interaction.response.send_message(
-            "I do not have permission to manage channel permissions."
-        )
-    except Exception as e:
-        await interaction.response.send_message(
-            f"An error occurred: {type(e).__name__} - {e}"
-        )
+#     try:
+#         await channel.set_permissions(guild.default_role, send_messages=False)
+#         await interaction.response.send_message(
+#             f"🔒 Channel {channel.mention} has been locked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
+#         )
+#     except discord.Forbidden:
+#         await interaction.response.send_message(
+#             "I do not have permission to manage channel permissions."
+#         )
+#     except Exception as e:
+#         await interaction.response.send_message(
+#             f"An error occurred: {type(e).__name__} - {e}"
+#         )
 
 
-@bot.tree.command(name="unlock", description="Unlock a channel.")
-@app_commands.guilds(discord.Object(id=SERVER_ID))
-async def unlock(interaction: discord.Interaction, channel: discord.TextChannel):
-    guild = interaction.guild
+# @bot.tree.command(name="unlock", description="Unlock a channel.")
+# @app_commands.guilds(discord.Object(id=SERVER_ID))
+# async def unlock(interaction: discord.Interaction, channel: discord.TextChannel):
+#     guild = interaction.guild
 
-    try:
-        # Restore the original permissions of the channel if they were stored
-        if channel.id in original_permissions:
-            await channel.set_permissions(
-                guild.default_role, overwrite=original_permissions[channel.id]
-            )
-            del original_permissions[
-                channel.id
-            ]  # Remove from dictionary after restoring
-        else:
-            # Default behavior if no original permissions were stored
-            await channel.set_permissions(guild.default_role, send_messages=True)
+#     try:
+#         # Restore the original permissions of the channel if they were stored
+#         if channel.id in original_permissions:
+#             await channel.set_permissions(
+#                 guild.default_role, overwrite=original_permissions[channel.id]
+#             )
+#             del original_permissions[
+#                 channel.id
+#             ]  # Remove from dictionary after restoring
+#         else:
+#             # Default behavior if no original permissions were stored
+#             await channel.set_permissions(guild.default_role, send_messages=True)
 
-        await interaction.response.send_message(
-            f"🔓 Channel {channel.mention} has been unlocked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
-        )
-    except discord.Forbidden:
-        await interaction.response.send_message(
-            "I do not have permission to manage channel permissions."
-        )
-    except Exception as e:
-        await interaction.response.send_message(
-            f"An error occurred: {type(e).__name__} - {e}"
-        )
+#         await interaction.response.send_message(
+#             f"🔓 Channel {channel.mention} has been unlocked on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}."
+#         )
+#     except discord.Forbidden:
+#         await interaction.response.send_message(
+#             "I do not have permission to manage channel permissions."
+#         )
+#     except Exception as e:
+#         await interaction.response.send_message(
+#             f"An error occurred: {type(e).__name__} - {e}"
+#         )
 
 
 @bot.tree.command(name="roleinfo", description="Get information about a role.")
