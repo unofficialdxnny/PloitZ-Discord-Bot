@@ -35,7 +35,7 @@ import subprocess
 
 load_dotenv(dotenv_path="./data/config/.env")
 
-# TOKEN = f"{os.getenv("TOKEN")}"
+TOKEN = f"{os.getenv("TOKEN")}"  
 
 SERVER_ID = 1250141995243143270
 WELCOME_CHANNEL_ID = 1250141995872026693
@@ -73,6 +73,23 @@ async def on_ready():
         synced_global = await bot.tree.sync()
         print(f"Successfully synced {len(synced_global)} global command(s)")
 
+        """
+        Creates a verification message in the designated verification channel.
+
+        If a verification message already exists in the channel, it will be reused.
+        Otherwise, a new message will be created with a verification embed and a reaction.
+
+        Args:
+            VERIFICATION_CHANNEL_ID (int): The ID of the verification channel.
+            REACTION_EMOJI (str): The emoji to use for the verification reaction.
+
+        Returns:
+            None
+
+        Raises:
+            discord.HTTPException: If there is an error sending the verification message.
+        """
+
         verification_channel = bot.get_channel(VERIFICATION_CHANNEL_ID)
         if not verification_channel:
             print(f"Verification channel with ID {VERIFICATION_CHANNEL_ID} not found.")
@@ -103,6 +120,8 @@ async def on_ready():
             except discord.HTTPException as e:
                 print(f"Failed to create verification message: {e}")
 
+                # verification system end
+
         # Update bot presence with dynamic member count
         member_count = sum(guild.member_count for guild in bot.guilds)
         await bot.change_presence(
@@ -124,8 +143,24 @@ async def on_ready():
         print(f"Error syncing guild commands: {e}")
 
 
+
 @bot.event
 async def on_raw_reaction_add(payload):
+    """
+    Event handler for when a reaction is added to a message.
+    
+    Grants the members role to a user who reacts with the expected emoji in the verification channel.
+    
+    Args:
+        payload (discord.RawReactionActionEvent): The reaction event payload.
+    
+    Returns:
+        None
+    
+    Raises:
+        discord.Forbidden: If the bot does not have permission to add roles to the user.
+        discord.HTTPException: If there is an error adding the role to the user.
+    """
     # Check if the reaction is added to a message in the verification channel
     if payload.channel_id != VERIFICATION_CHANNEL_ID:
         return
@@ -1025,12 +1060,12 @@ async def snapify(interaction: discord.Interaction):
 @bot.tree.command(name="reaction_role", description="Get a role by clicking a button")
 @app_commands.guilds(discord.Object(id=SERVER_ID))
 async def reaction_role(
-    interaction: discord.Interaction, role: discord.Role, emoji: str, message: str
+    interaction: discord.Interaction, role: discord.Role, emoji: str
 ):
     # Check if the user is an admin
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
-            "You do not have permission to use this command. Admins only."
+            "You do not have permission to use this command. Admins only.", ephemeral=True
         )
         return
     view = View()
@@ -1057,18 +1092,18 @@ async def reaction_role(
             try:
                 await interaction.user.add_roles(role)
                 await interaction.response.send_message(
-                    f"You have been given the {role.mention} role!"
+                    f"You have been given the {role.mention} role!", ephemeral=True
                 )
             except discord.Forbidden:
                 await interaction.response.send_message(
-                    "I do not have permission to add this role."
+                    "I do not have permission to add this role.", ephemeral=True
                 )
             except discord.HTTPException:
                 await interaction.response.send_message(
-                    "Failed to add the role. Please try again later."
+                    "Failed to add the role. Please try again later.", ephemeral=True
                 )
         else:
-            await interaction.response.send_message("You already have this role.")
+            await interaction.response.send_message("You already have this role.", ephemeral=True)
 
     button = Button(label="Get Role", emoji=custom_emoji)
     button.callback = button_callback  # Assign the callback to the button
@@ -1076,7 +1111,7 @@ async def reaction_role(
     view.add_item(button)
 
     await interaction.response.send_message(
-        f"{message} \nClick the button to get the {role.mention} role!", view=view
+        f"Click the button to get the {role.mention} role!", view=view
     )
 
 
